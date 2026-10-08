@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 # Richtet die Präsentations-Website auf einem Debian/Ubuntu-VPS ein.
-# Aufruf (im Repo-Ordner auf dem VPS):  sudo bash deploy/install.sh <SERVER-IP> <UPLOAD-PASSWORT>
+# Aufruf (im Repo-Ordner auf dem VPS):
+#   sudo bash deploy/install.sh <DOMAIN-ODER-IP> <UPLOAD-PASSWORT> [E-MAIL-FÜR-LETS-ENCRYPT]
+# Bei einer Domain wird automatisch ein HTTPS-Zertifikat (certbot) geholt.
 # Bestehende nginx-Seiten werden nicht verändert; es kommt nur eine neue Datei dazu.
 set -euo pipefail
 
-SERVER_NAME="${1:?Aufruf: sudo bash deploy/install.sh <SERVER-IP> <UPLOAD-PASSWORT>}"
+SERVER_NAME="${1:?Aufruf: sudo bash deploy/install.sh <DOMAIN-ODER-IP> <UPLOAD-PASSWORT> [E-MAIL]}"
 PASSWORD="${2:?Upload-Passwort fehlt}"
+EMAIL="${3:-}"
+IS_DOMAIN=1
+[[ "$SERVER_NAME" =~ ^[0-9.]+$ || "$SERVER_NAME" == *:* ]] && IS_DOMAIN=0
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 WEB=/var/www/praesentationen
 CONF_NAME=praesentationen
@@ -72,14 +77,29 @@ systemctl reload nginx
 
 # 6. Firewall
 if command -v ufw >/dev/null && ufw status | grep -q "Status: active"; then
-  ufw allow 80/tcp >/dev/null && echo "ufw: Port 80 freigegeben."
+  ufw allow 80/tcp >/dev/null && ufw allow 443/tcp >/dev/null && echo "ufw: Ports 80 und 443 freigegeben."
 fi
 
-# 7. Test
+# 7. HTTPS (nur mit Domain; certbot ändert nur die eigene Datei $CONF)
+SCHEME=http
+if [ "$IS_DOMAIN" -eq 1 ]; then
+  if ! command -v certbot >/dev/null; then
+    apt-get update -q && DEBIAN_FRONTEND=noninteractive apt-get install -y -q certbot python3-certbot-nginx
+  fi
+  if [ -n "$EMAIL" ]; then MAILOPT=(-m "$EMAIL"); else MAILOPT=(--register-unsafely-without-email); fi
+  if certbot --nginx -d "$SERVER_NAME" --non-interactive --agree-tos --redirect "${MAILOPT[@]}"; then
+    SCHEME=https
+  else
+    echo "WARNUNG: certbot fehlgeschlagen (DNS-Eintrag prüfen). Die Seite läuft vorerst über http."
+  fi
+fi
+
+# 8. Test
 sleep 1
-curl -fsS -o /dev/null -w "Startseite: HTTP %{http_code}\n" -H "Host: $SERVER_NAME" http://127.0.0.1/
-curl -fsS -o /dev/null -w "Liste:      HTTP %{http_code}\n" -H "Host: $SERVER_NAME" http://127.0.0.1/p/list.json
-code=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Host: $SERVER_NAME" -H "X-Password: falsch" --data "x" http://127.0.0.1/api/upload)
+if [ "$IS_DOMAIN" -eq 1 ]; then BASE="$SCHEME://$SERVER_NAME"; RES=(); else BASE="http://127.0.0.1"; RES=(-H "Host: $SERVER_NAME"); fi
+curl -fsS -o /dev/null -w "Startseite: HTTP %{http_code}\n" "${RES[@]}" "$BASE/" || echo "Startseite: FEHLER"
+curl -fsS -o /dev/null -w "Liste:      HTTP %{http_code}\n" "${RES[@]}" "$BASE/p/list.json" || echo "Liste: FEHLER"
+code=$(curl -s -o /dev/null -w "%{http_code}" -X POST "${RES[@]}" -H "X-Password: falsch" --data "x" "$BASE/api/upload")
 echo "Upload-Dienst (falsches Passwort soll 403 sein): HTTP $code"
 echo
-echo "Fertig: http://$SERVER_NAME/"
+echo "Fertig: $SCHEME://$SERVER_NAME/"

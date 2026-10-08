@@ -14,20 +14,23 @@ quelle-neuseeland/           Quellcode der Neuseeland-Präsentation (gen.js, tem
 CLAUDE-PROMPT.md             Vorlage, um bei Claude neue Präsentationen zu bestellen
 ```
 
-## Einrichten (Debian/Ubuntu-VPS, keine Domain nötig)
+## Einrichten (Debian/Ubuntu-VPS)
 
 ```bash
-git clone https://github.com/oregon779/powerpoint.git && cd powerpoint
-sudo bash deploy/install.sh <SERVER-IP> <UPLOAD-PASSWORT>
+git clone -b claude/beautiful-sagan-hqqclj https://github.com/oregon779/powerpoint.git && cd powerpoint
+sudo bash deploy/install.sh powerpoint.stoneuniverse.de <UPLOAD-PASSWORT> [E-MAIL]
 ```
 
-Danach läuft die Seite unter `http://<SERVER-IP>/`. Das Skript
+Danach läuft die Seite unter `https://powerpoint.stoneuniverse.de/`. Statt der Domain geht
+auch die IP (dann nur http). Die E-Mail ist optional; Let's Encrypt warnt darüber, bevor
+ein Zertifikat abläuft (certbot erneuert es aber ohnehin automatisch). Das Skript
 
 - installiert nginx, falls es fehlt,
 - legt `/var/www/praesentationen` und den Dienst `praesentationen` an,
 - legt eine **eigene** nginx-Datei `praesentationen` an (bestehende Seiten bleiben unverändert;
   bricht ab, falls schon eine andere Seite dieselbe IP als `server_name` nutzt),
-- öffnet Port 80 in ufw, falls ufw aktiv ist,
+- öffnet Port 80 und 443 in ufw, falls ufw aktiv ist,
+- holt bei einer Domain mit certbot ein kostenloses HTTPS-Zertifikat und leitet http auf https um,
 - testet die Seite mit curl.
 
 Ansehen kann jeder mit dem Link. Hochladen und Löschen geht nur mit dem Passwort.
@@ -35,7 +38,6 @@ Passwort ändern: `/etc/praesentationen.env` bearbeiten, dann `sudo systemctl re
 
 ## Hinweis
 
-Ohne Domain gibt es kein HTTPS (Let's Encrypt stellt keine Zertifikate für reine IPs aus).
-Das Upload-Passwort geht deshalb unverschlüsselt über das Netz. Für 5 Leute und
-Schulpräsentationen ist das meist okay, aber nimm kein Passwort, das du woanders benutzt.
-Mit einer (auch kostenlosen) Domain kann später `certbot --nginx` nachgerüstet werden.
+Der DNS-A-Eintrag der Domain muss auf den VPS zeigen, sonst schlägt certbot fehl
+(die Seite läuft dann trotzdem über http, und `sudo certbot --nginx -d <DOMAIN>` kann später
+nachgeholt werden).

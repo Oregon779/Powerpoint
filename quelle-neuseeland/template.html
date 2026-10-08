@@ -71,6 +71,9 @@ b, strong { font-weight: 700; }
 #progress { position: fixed; left: 0; bottom: 0; height: 4px; background: var(--gold); width: 0; z-index: 19; transition: width .5s var(--ease); }
 #notes { position: fixed; left: 16px; right: 16px; bottom: calc(80px + env(safe-area-inset-bottom, 0px)); max-width: 760px; margin: 0 auto; background: rgba(13,21,36,.94); color: #E6EAF0; border: 1px solid rgba(201,209,220,.2); border-radius: 18px; padding: 18px 22px; font: 400 17px/1.5 var(--f); z-index: 21; box-sizing: border-box; }
 #notes .lbl { font-size: 12px; display: block; margin-bottom: 6px; }
+#close { all: unset; position: fixed; left: max(16px, env(safe-area-inset-left, 0px)); top: calc(16px + env(safe-area-inset-top, 0px)); z-index: 20; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 10px 18px 10px 14px; border-radius: 999px; background: rgba(13,21,36,.82); border: 1px solid rgba(201,209,220,.18); color: #E6EAF0; font: 600 16px var(--f); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: opacity .4s, transform .4s; }
+#close svg { width: 20px; height: 20px; fill: currentColor; }
+#close.hide { opacity: 0; transform: translateY(-12px); pointer-events: none; }
 #toast { position: fixed; left: 16px; right: 16px; top: calc(16px + env(safe-area-inset-top, 0px)); max-width: 560px; margin: 0 auto; background: rgba(13,21,36,.95); color: #E6EAF0; border: 1px solid rgba(201,209,220,.2); border-radius: 16px; padding: 14px 18px; font: 400 16px/1.45 var(--f); z-index: 31; box-sizing: border-box; }
 #help { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(8,13,23,.72); z-index: 30; padding: 16px; box-sizing: border-box; }
 #help .box { background: var(--white); color: var(--ink); border-radius: 20px; padding: 28px 30px; max-width: 520px; width: 100%; box-sizing: border-box; font: 400 16px/1.55 var(--f); max-height: 100%; overflow: auto; }
@@ -480,6 +483,15 @@ b, strong { font-weight: 700; }
   const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const standalone = navigator.standalone === true || window.matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches;
   const fsBtn = document.getElementById('fsBtn');
+  // Zurück zur Übersicht (in der Web-App gibt es keinen Browser-Zurück-Knopf); erscheint zusammen mit der Bedienleiste
+  const close = document.createElement('button');
+  close.id = 'close'; close.setAttribute('aria-label', 'Präsentation schließen');
+  close.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12z"/></svg>Schließen';
+  close.addEventListener('click', e => { e.stopPropagation(); location.href = '/'; });
+  document.body.appendChild(close);
+  const syncClose = () => close.classList.toggle('hide', ui.classList.contains('hide'));
+  new MutationObserver(syncClose).observe(ui, { attributes: true, attributeFilter: ['class'] });
+  syncClose();
   if (ios && standalone) fsBtn.hidden = true;
   const toast = document.createElement('div');
   toast.id = 'toast'; toast.hidden = true;

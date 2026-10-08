@@ -23,6 +23,9 @@ Technische Vorgaben, bitte genau einhalten:
   mit `webkit`-Variante für iPad) erscheint nur beim Tippen auf den oberen/unteren Rand
   (dunkler Rand bzw. obere/untere 10 %), ein zweiter Randtipp blendet sie aus; am Computer
   auch bei Mausbewegung (`pointerType === 'mouse'`). Sie blendet sich nach ein paar Sekunden aus.
+  Zusammen mit der Leiste erscheint oben links ein Knopf **„Schließen“**, der zur Übersicht `/`
+  zurückführt (die Seite läuft als Web-App ohne Browser-Zurück-Knopf). Auf iPad/iPhone kein
+  Safari-Vollbild auslösen (das zeigt einen X-Knopf); stattdessen Hinweis „Teilen → Zum Home-Bildschirm“.
 - Folienwechsel mit weicher Überblendung, Elemente erscheinen gestaffelt mit
   Animationen (einfliegen, einblenden, Balken wachsen). `prefers-reduced-motion` beachten.
 - Aktuelle Folie in der URL merken (`#s3`), damit Neuladen auf derselben Folie bleibt.

@@ -1,0 +1,10 @@
+{
+  "name": "Präsentationen",
+  "short_name": "Präsentationen",
+  "start_url": "/",
+  "scope": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0D1524",
+  "theme_color": "#0D1524"
+}

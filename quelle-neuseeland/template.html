@@ -371,8 +371,9 @@ b, strong { font-weight: 700; }
   <div class="box" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
     <h3 id="helpTitle">So präsentierst du</h3>
     <ul>
-      <li><b>Weiter:</b> Tippen, Wischen nach links, <kbd>→</kbd> oder <kbd>Leertaste</kbd></li>
-      <li><b>Zurück:</b> Wischen nach rechts oder <kbd>←</kbd></li>
+      <li><b>Weiter:</b> rechts tippen, nach links wischen, <kbd>→</kbd> oder <kbd>Leertaste</kbd></li>
+      <li><b>Zurück:</b> links tippen, nach rechts wischen oder <kbd>←</kbd></li>
+      <li><b>Bedienleiste:</b> ganz oben oder unten an den Rand tippen</li>
       <li><b>Vollbild:</b> Taste <kbd>F</kbd> oder Vollbild-Knopf</li>
       <li><b>Sprechernotizen:</b> Taste <kbd>N</kbd>. Achtung: Bei AirPlay sieht das Publikum sie mit.</li>
       <li><b>AirPlay (iPad/iPhone):</b> Kontrollzentrum öffnen → <b>Bildschirmsynchronisierung</b> → Apple TV wählen. Dann Vollbild antippen.</li>
@@ -489,10 +490,10 @@ b, strong { font-weight: 700; }
     else if (k === 'End') show(N - 1, true);
     else if (k === 'f' || k === 'F') toggleFs();
     else if (k === 'n' || k === 'N') toggleNotes();
-    wake();
   });
 
-  // Tap / click: left third = back, rest = forward
+  // Tippen: linke Hälfte = zurück, rechte Hälfte = weiter.
+  // Nur ein Tipp auf den oberen/unteren Rand blendet die Bedienleiste ein bzw. aus.
   let touchX = null, touchY = null, swiped = false;
   const vp = document.getElementById('viewport');
   vp.addEventListener('touchstart', e => { const t = e.changedTouches[0]; touchX = t.clientX; touchY = t.clientY; swiped = false; }, { passive: true });
@@ -504,19 +505,22 @@ b, strong { font-weight: 700; }
   }, { passive: true });
   vp.addEventListener('click', e => {
     if (swiped) { swiped = false; return; }
-    if (e.clientX < window.innerWidth / 3) prev(); else next();
-    wake();
+    const h = window.innerHeight, r = stage.getBoundingClientRect();
+    const top = Math.max(r.top, h * 0.1), bottom = Math.min(r.bottom, h * 0.9);
+    if (e.clientY < top || e.clientY > bottom) { ui.classList.contains('hide') ? wake() : hideUi(); return; }
+    if (e.clientX < window.innerWidth / 2) prev(); else next();
   });
 
   // Auto-hide controls while presenting
   let idle;
+  function hideUi() { clearTimeout(idle); ui.classList.add('hide'); }
   function wake() {
     ui.classList.remove('hide'); document.body.style.cursor = '';
     clearTimeout(idle);
     idle = setTimeout(() => { if (help.hidden) { ui.classList.add('hide'); document.body.style.cursor = 'none'; } }, 2800);
   }
-  document.addEventListener('mousemove', wake);
-  document.addEventListener('touchstart', wake, { passive: true });
+  // Maus am Computer zeigt die Leiste weiterhin; Finger auf dem iPad nicht
+  document.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') wake(); });
   wake();
 
   // Keep the screen awake during the talk

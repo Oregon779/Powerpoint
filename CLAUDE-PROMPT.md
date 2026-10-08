@@ -17,10 +17,12 @@ Technische Vorgaben, bitte genau einhalten:
   `transform: translate(-50%,-50%) scale(k)` zentrieren (k = kleinerer Wert aus
   Breite/1600 und Höhe/900, Maße aus `visualViewport`), **nicht** per Grid/Flex-Zentrierung.
   Bei `resize`, `orientationchange` und Vollbildwechsel neu berechnen.
-- Steuerung: rechts tippen / nach links wischen / Pfeil rechts / Leertaste = weiter,
-  links tippen / nach rechts wischen / Pfeil links = zurück. Vollbild-Knopf
-  (Fullscreen-API, mit `webkit`-Variante für iPad). Folienzähler unten rechts,
-  Bedienleiste blendet sich nach ein paar Sekunden aus.
+- Steuerung: rechte Bildhälfte tippen / nach links wischen / Pfeil rechts / Leertaste = weiter,
+  linke Bildhälfte tippen / nach rechts wischen / Pfeil links = zurück. Normales Tippen und
+  Tastendrücke zeigen **keine** Bedienleiste. Die Leiste (zurück, Zähler, weiter, Vollbild
+  mit `webkit`-Variante für iPad) erscheint nur beim Tippen auf den oberen/unteren Rand
+  (dunkler Rand bzw. obere/untere 10 %), ein zweiter Randtipp blendet sie aus; am Computer
+  auch bei Mausbewegung (`pointerType === 'mouse'`). Sie blendet sich nach ein paar Sekunden aus.
 - Folienwechsel mit weicher Überblendung, Elemente erscheinen gestaffelt mit
   Animationen (einfliegen, einblenden, Balken wachsen). `prefers-reduced-motion` beachten.
 - Aktuelle Folie in der URL merken (`#s3`), damit Neuladen auf derselben Folie bleibt.

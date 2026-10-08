@@ -558,7 +558,7 @@ b, strong { font-weight: 700; }
   const close = document.createElement('button');
   close.id = 'close'; close.setAttribute('aria-label', 'Präsentation schließen');
   close.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12z"/></svg>Schließen';
-  close.addEventListener('click', e => { e.stopPropagation(); location.href = '/'; });
+  close.addEventListener('click', e => { e.stopPropagation(); (window.top || window).location.href = '/'; });
   document.body.appendChild(close);
   const syncClose = () => close.classList.toggle('hide', ui.classList.contains('hide'));
   new MutationObserver(syncClose).observe(ui, { attributes: true, attributeFilter: ['class'] });

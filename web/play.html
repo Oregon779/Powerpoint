@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Präsentationen">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0D1524">
+<title>Präsentation</title>
+<style>
+/* Spielt jede hochgeladene Präsentation in einer festen 16:9-Bühne ab (wie ein Beamer mit
+   1920x1080) und skaliert diese passend auf den Bildschirm. So wird nichts abgeschnitten,
+   egal wie die HTML-Datei selbst aufgebaut ist. */
+:root { --bg: #0D1524; --ink: #E6EAF0; --f: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; color-scheme: dark; }
+[hidden] { display: none !important; }
+html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; -webkit-tap-highlight-color: transparent; font-family: var(--f); }
+#wrap { position: fixed; inset: 0; overflow: hidden; }
+#frame { position: absolute; left: 50%; top: 50%; border: 0; background: #fff; transform-origin: center center; }
+#close { all: unset; position: fixed; left: max(16px, env(safe-area-inset-left, 0px)); top: calc(16px + env(safe-area-inset-top, 0px)); z-index: 5; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 10px 18px 10px 14px; border-radius: 999px; background: rgba(13,21,36,.85); border: 1px solid rgba(201,209,220,.2); color: var(--ink); font: 600 16px var(--f); transition: opacity .4s, transform .4s; }
+#close svg { width: 20px; height: 20px; fill: currentColor; }
+#close.hide { opacity: 0; transform: translateY(-12px); pointer-events: none; }
+#err { position: fixed; inset: 0; display: grid; place-items: center; color: var(--ink); font-size: 18px; text-align: center; padding: 16px; }
+</style>
+</head>
+<body>
+<div id="wrap"><iframe id="frame" title="Präsentation" allow="fullscreen; screen-wake-lock"></iframe></div>
+<button id="close" class="hide" aria-label="Präsentation schließen"><svg viewBox="0 0 24 24"><path d="M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12z"/></svg>Schließen</button>
+<div id="err" hidden></div>
+<script>
+(function () {
+  const frame = document.getElementById('frame'), close = document.getElementById('close');
+  const id = new URLSearchParams(location.search).get('id') || '';
+  if (!/^[a-z0-9][a-z0-9-]{0,79}$/.test(id)) {
+    const err = document.getElementById('err'); err.hidden = false; err.textContent = 'Präsentation nicht gefunden.'; return;
+  }
+
+  // Virtuelle Bildschirmgröße der Präsentation (16:9). Wird größer, falls die Datei breiter gebaut ist.
+  let W = 1920, H = 1080;
+  function fit() {
+    const vv = window.visualViewport;
+    const w = vv ? vv.width : innerWidth, h = vv ? vv.height : innerHeight;
+    const k = Math.min(w / W, h / H);
+    frame.style.width = W + 'px'; frame.style.height = H + 'px';
+    frame.style.transform = 'translate(-50%, -50%) scale(' + k + ')';
+  }
+  addEventListener('resize', fit);
+  addEventListener('orientationchange', () => setTimeout(fit, 300));
+  if (window.visualViewport) visualViewport.addEventListener('resize', fit);
+  fit();
+
+  frame.addEventListener('load', () => {
+    try {
+      const d = frame.contentDocument, de = d.documentElement;
+      document.title = d.title || 'Präsentation';
+      // Datei mit fester, breiterer Bühne (z. B. 2560 px) ohne eigene Skalierung: Bühne vergrößern
+      const sw = Math.max(de.scrollWidth, d.body ? d.body.scrollWidth : 0);
+      if (sw > W + 4) { W = sw; H = Math.round(sw * 9 / 16); fit(); }
+      // „Schließen“ in der Präsentation selbst soll die ganze Seite verlassen, nicht nur den Rahmen
+      d.addEventListener('click', e => {
+        const a = e.target.closest && e.target.closest('a[href]');
+        if (a && !a.getAttribute('href').startsWith('#')) { e.preventDefault(); location.href = a.href; }
+      }, true);
+    } catch (e) {}
+    frame.focus();
+  });
+  frame.src = '/p/' + id + '.html';
+
+  // Tipp auf den dunklen Rand außerhalb der Präsentation: Schließen-Knopf zeigen/verstecken
+  let t;
+  document.getElementById('wrap').addEventListener('click', e => {
+    if (e.target === frame) return;
+    if (close.classList.contains('hide')) {
+      close.classList.remove('hide'); clearTimeout(t); t = setTimeout(() => close.classList.add('hide'), 4000);
+    } else close.classList.add('hide');
+  });
+  close.addEventListener('click', () => { location.href = '/'; });
+})();
+</script>
+</body>
+</html>

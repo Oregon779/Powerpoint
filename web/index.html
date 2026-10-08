@@ -114,7 +114,7 @@ async function load() {
   $("manage").hidden = !items.length;
   if (!items.length) { $("list").innerHTML = '<div class="empty">Noch keine Präsentation hochgeladen.</div>'; return; }
   $("list").innerHTML = items.map((i) => `
-    <a class="item" href="/p/${encodeURIComponent(i.id)}.html">
+    <a class="item" href="/play.html?id=${encodeURIComponent(i.id)}">
       <div class="play">${PLAY}</div>
       <div class="meta"><b>${esc(i.title)}</b><span>${fmtDate(i.date)}</span></div>
       ${managing ? `<button class="del" data-id="${esc(i.id)}" data-title="${esc(i.title)}">Löschen</button>` : ""}

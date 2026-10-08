@@ -15,7 +15,7 @@ REPO="$(cd "$(dirname "$0")/.." && pwd)"
 WEB=/var/www/praesentationen
 CONF_NAME=praesentationen
 
-[[ "$PASSWORD" =~ ^[A-Za-z0-9._-]{6,}$ ]] || { echo "Passwort: mind. 6 Zeichen, nur Buchstaben, Ziffern, . _ -"; exit 1; }
+[[ "$PASSWORD" =~ ^[A-Za-z0-9._-]{4,}$ ]] || { echo "Passwort: mind. 4 Zeichen, nur Buchstaben, Ziffern, . _ -"; exit 1; }
 [ "$(id -u)" -eq 0 ] || { echo "Bitte mit sudo ausführen."; exit 1; }
 
 # 1. Pakete

@@ -11,8 +11,12 @@ Inhalte/Stichpunkte: [STICHPUNKTE ODER TEXT EINFÜGEN]
 Technische Vorgaben, bitte genau einhalten:
 - Liefere **eine einzige HTML-Datei** (beginnt mit `<!doctype html>`), alles inline:
   CSS, JavaScript und Bilder als Base64. Keine externen Dateien außer Google Fonts.
-- Feste Bühne 1600×900 px, die per CSS-`transform: scale()` auf jeden Bildschirm passt
-  (Handy quer, iPad, Fernseher über AirPlay), Rand in dunkler Farbe.
+- Feste Bühne 1600×900 px, die auf jeden Bildschirm passt (Handy quer, iPad, Fernseher
+  über AirPlay), Rand in dunkler Farbe. Wichtig, sonst wird sie auf dem iPad abgeschnitten:
+  Bühne mit `position:absolute; left:50%; top:50%` und
+  `transform: translate(-50%,-50%) scale(k)` zentrieren (k = kleinerer Wert aus
+  Breite/1600 und Höhe/900, Maße aus `visualViewport`), **nicht** per Grid/Flex-Zentrierung.
+  Bei `resize`, `orientationchange` und Vollbildwechsel neu berechnen.
 - Steuerung: rechts tippen / nach links wischen / Pfeil rechts / Leertaste = weiter,
   links tippen / nach rechts wischen / Pfeil links = zurück. Vollbild-Knopf
   (Fullscreen-API, mit `webkit`-Variante für iPad). Folienzähler unten rechts,

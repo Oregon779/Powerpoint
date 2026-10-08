@@ -1,0 +1,18 @@
+[Unit]
+Description=Upload-Dienst der Praesentations-Website
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+EnvironmentFile=/etc/praesentationen.env
+Environment=PRAES_DIR=/var/www/praesentationen/p
+ExecStart=/usr/bin/python3 /opt/praesentationen/upload_server.py
+Restart=on-failure
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/www/praesentationen/p
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

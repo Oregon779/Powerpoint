@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0D1524">
+<title>Präsentationen</title>
+<style>
+:root {
+  --bg: #0D1524; --panel: #16223A; --panel-2: #1D2B44; --line: rgba(201,209,220,.16);
+  --ink: #F1F4F8; --muted: #9AA7BA; --gold: #BA8A53; --gold-hi: #D3A874; --danger: #E06C6C;
+  --f: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f); -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+main { max-width: 760px; margin: 0 auto; padding: calc(28px + env(safe-area-inset-top, 0px)) 16px calc(48px + env(safe-area-inset-bottom, 0px)); }
+h1 { font-size: 30px; font-weight: 800; letter-spacing: -.5px; margin: 0; }
+.kicker { color: var(--gold); font-size: 13px; font-weight: 700; letter-spacing: .24em; text-transform: uppercase; margin: 0 0 6px; }
+.sub { color: var(--muted); margin: 6px 0 0; font-size: 15px; line-height: 1.45; }
+section { margin-top: 28px; }
+h2 { font-size: 13px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; display: flex; justify-content: space-between; align-items: center; }
+.list { display: grid; gap: 10px; }
+.item { display: flex; align-items: center; gap: 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px; text-decoration: none; color: inherit; transition: background .15s; }
+.item:active, .item:hover { background: var(--panel-2); }
+.play { width: 46px; height: 46px; border-radius: 50%; background: var(--gold); display: grid; place-items: center; flex: none; }
+.play svg { width: 18px; height: 18px; fill: #fff; margin-left: 3px; }
+.meta { flex: 1; min-width: 0; }
+.meta b { display: block; font-size: 17px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.meta span { color: var(--muted); font-size: 13px; }
+.del { all: unset; cursor: pointer; color: var(--danger); font-size: 14px; font-weight: 600; padding: 10px 6px; }
+.empty { color: var(--muted); background: var(--panel); border: 1px dashed var(--line); border-radius: 16px; padding: 22px; text-align: center; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: grid; gap: 12px; }
+label { font-size: 14px; color: var(--muted); display: grid; gap: 6px; }
+input[type=text], input[type=password] { font: inherit; font-size: 16px; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px; width: 100%; }
+input:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
+.drop { border: 2px dashed var(--line); border-radius: 12px; padding: 20px; text-align: center; color: var(--muted); cursor: pointer; }
+.drop.has { border-color: var(--gold); color: var(--ink); }
+.drop input { display: none; }
+.btn { all: unset; cursor: pointer; text-align: center; background: var(--gold); color: #fff; font-weight: 700; border-radius: 12px; padding: 14px; }
+.btn:hover { background: var(--gold-hi); }
+.btn[disabled] { opacity: .5; pointer-events: none; }
+.link { all: unset; cursor: pointer; color: var(--gold-hi); font-size: 13px; letter-spacing: 0; text-transform: none; font-weight: 600; }
+.msg { font-size: 14px; min-height: 1em; margin: 0; }
+.msg.err { color: var(--danger); } .msg.ok { color: #7BC59A; }
+details { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 4px 18px; }
+summary { cursor: pointer; padding: 12px 0; font-weight: 600; }
+details ol { margin: 0 0 14px; padding-left: 20px; color: var(--muted); line-height: 1.6; font-size: 15px; }
+details b { color: var(--ink); }
+</style>
+</head>
+<body>
+<main>
+  <p class="kicker">Präsentationen</p>
+  <h1>Unsere Präsentationen</h1>
+  <p class="sub">Antippen zum Öffnen. In der Präsentation: rechts tippen = weiter, links tippen = zurück.</p>
+
+  <section>
+    <h2><span>Alle Präsentationen</span><button class="link" id="manage" hidden>Verwalten</button></h2>
+    <div class="list" id="list"><div class="empty">Wird geladen …</div></div>
+  </section>
+
+  <section>
+    <details>
+      <summary>So präsentierst du auf dem Fernseher (AirPlay)</summary>
+      <ol>
+        <li>iPhone/iPad und Apple TV bzw. AirPlay-Fernseher im <b>selben WLAN</b>.</li>
+        <li>Kontrollzentrum öffnen → <b>Bildschirmsynchronisierung</b> → Fernseher wählen.</li>
+        <li>Diese Seite öffnen, Präsentation antippen. Gerät <b>quer</b> halten.</li>
+        <li><b>Rechts tippen</b> oder nach links wischen = nächste Folie, <b>links tippen</b> = zurück.</li>
+        <li>Für echtes Vollbild auf dem iPhone: in Safari <b>Teilen → Zum Home-Bildschirm</b> und die Seite von dort starten.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section>
+    <h2><span>Neue Präsentation hochladen</span></h2>
+    <form class="card" id="up">
+      <label class="drop" id="drop">
+        <input type="file" id="file" accept=".html,.htm,text/html">
+        <span id="dropTxt">HTML-Datei von Claude auswählen</span>
+      </label>
+      <label>Titel (optional)<input type="text" id="title" placeholder="wird sonst aus der Datei übernommen" maxlength="120"></label>
+      <label>Passwort<input type="password" id="pw" autocomplete="current-password" required></label>
+      <button class="btn" id="send" type="submit">Hochladen</button>
+      <p class="msg" id="msg" role="status"></p>
+    </form>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const PLAY = '<svg viewBox="0 0 16 16"><path d="M3 1.5v13l11-6.5z"/></svg>';
+let managing = false;
+
+function getPw() { try { return sessionStorage.getItem("pw") || ""; } catch (e) { return ""; } }
+function setPw(v) { try { sessionStorage.setItem("pw", v); } catch (e) {} }
+$("pw").value = getPw();
+
+function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+function fmtDate(d) { const m = /^(\d{4})-(\d\d)-(\d\d)/.exec(d || ""); return m ? `${m[3]}.${m[2]}.${m[1]}` : ""; }
+
+async function load() {
+  let items = [];
+  try {
+    const r = await fetch("/p/list.json", { cache: "no-store" });
+    if (r.ok) items = await r.json();
+  } catch (e) {}
+  $("manage").hidden = !items.length;
+  if (!items.length) { $("list").innerHTML = '<div class="empty">Noch keine Präsentation hochgeladen.</div>'; return; }
+  $("list").innerHTML = items.map((i) => `
+    <a class="item" href="/p/${encodeURIComponent(i.id)}.html">
+      <div class="play">${PLAY}</div>
+      <div class="meta"><b>${esc(i.title)}</b><span>${fmtDate(i.date)}</span></div>
+      ${managing ? `<button class="del" data-id="${esc(i.id)}" data-title="${esc(i.title)}">Löschen</button>` : ""}
+    </a>`).join("");
+}
+
+$("list").addEventListener("click", async (e) => {
+  const b = e.target.closest(".del");
+  if (!b) return;
+  e.preventDefault();
+  if (!confirm(`„${b.dataset.title}“ wirklich löschen?`)) return;
+  const pw = getPw() || prompt("Passwort:") || "";
+  const r = await fetch("/api/delete?id=" + encodeURIComponent(b.dataset.id), { method: "DELETE", headers: { "X-Password": pw } });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) { alert(j.error || "Löschen fehlgeschlagen"); return; }
+  setPw(pw);
+  load();
+});
+
+$("manage").addEventListener("click", () => { managing = !managing; $("manage").textContent = managing ? "Fertig" : "Verwalten"; load(); });
+
+$("file").addEventListener("change", () => {
+  const f = $("file").files[0];
+  $("dropTxt").textContent = f ? f.name : "HTML-Datei von Claude auswählen";
+  $("drop").classList.toggle("has", !!f);
+});
+
+$("up").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const f = $("file").files[0], msg = $("msg");
+  msg.className = "msg";
+  if (!f) { msg.textContent = "Bitte zuerst eine Datei auswählen."; msg.classList.add("err"); return; }
+  $("send").disabled = true; msg.textContent = "Wird hochgeladen …";
+  try {
+    const r = await fetch("/api/upload?title=" + encodeURIComponent($("title").value.trim()), {
+      method: "POST", headers: { "X-Password": $("pw").value, "Content-Type": "text/html" }, body: f,
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || (r.status === 413 ? "Datei zu groß" : r.status === 404 || r.status === 502 ? "Upload-Dienst nicht erreichbar" : "Upload fehlgeschlagen"));
+    setPw($("pw").value);
+    msg.textContent = "Fertig! Die Präsentation steht jetzt oben in der Liste."; msg.classList.add("ok");
+    $("up").reset(); $("pw").value = getPw(); $("file").dispatchEvent(new Event("change"));
+    load();
+  } catch (err) {
+    msg.textContent = err.message; msg.classList.add("err");
+  } finally { $("send").disabled = false; }
+});
+
+load();
+</script>
+</body>
+</html>

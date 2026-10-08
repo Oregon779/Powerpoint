@@ -90,7 +90,10 @@ if [ "$IS_DOMAIN" -eq 1 ]; then
   if certbot --nginx -d "$SERVER_NAME" --non-interactive --agree-tos --redirect "${MAILOPT[@]}"; then
     SCHEME=https
   else
-    echo "WARNUNG: certbot fehlgeschlagen (DNS-Eintrag prüfen). Die Seite läuft vorerst über http."
+    echo "FEHLER: Kein HTTPS-Zertifikat bekommen. Prüfen: zeigt der DNS-Eintrag von $SERVER_NAME"
+    echo "auf diesen Server, und ist Port 80 von außen erreichbar (auch in der Firewall des Hosters)?"
+    echo "Danach das Skript einfach nochmal ausführen."
+    exit 4
   fi
 fi
 

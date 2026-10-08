@@ -38,6 +38,7 @@ Passwort ändern: `/etc/praesentationen.env` bearbeiten, dann `sudo systemctl re
 
 ## Hinweis
 
-Der DNS-A-Eintrag der Domain muss auf den VPS zeigen, sonst schlägt certbot fehl
-(die Seite läuft dann trotzdem über http, und `sudo certbot --nginx -d <DOMAIN>` kann später
-nachgeholt werden).
+Mit Domain läuft die Seite nur über https; wer http aufruft, wird automatisch umgeleitet.
+Port 80 bleibt dafür und für die automatische Zertifikats-Verlängerung offen.
+Der DNS-A-Eintrag der Domain muss auf den VPS zeigen, sonst bricht das Skript beim
+Zertifikat mit einer Fehlermeldung ab.

@@ -8,16 +8,17 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Präsentationen">
 <link rel="manifest" href="/manifest.webmanifest">
-<meta name="theme-color" content="#0B1220">
+<meta name="theme-color" content="#05080F">
 <title>Präsentationen</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
 <style>
 :root {
-  --bg: #0B1220; --panel: rgba(22,34,58,.72); --panel-solid: #16223A; --panel-2: #1D2B44;
-  --line: rgba(201,209,220,.13); --line-2: rgba(201,209,220,.24);
-  --ink: #F3F5F9; --muted: #95A3B8; --gold: #BA8A53; --gold-hi: #D9AE78; --danger: #E57373; --ok: #7BC59A;
+  --bg: #05080F; --panel: rgba(18,26,44,.62); --panel-2: rgba(28,40,66,.75);
+  --line: rgba(220,228,240,.10); --line-2: rgba(220,228,240,.22);
+  --ink: #F5F7FB; --muted: #97A4B9; --gold: #C8955A; --gold-hi: #F0C48A; --amber: #FF9F43; --violet: #7C6CFF; --cyan: #3CC8FF;
+  --danger: #FF6B6B; --ok: #6EE7A8;
   --f: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   --ease: cubic-bezier(.2,.75,.2,1);
   color-scheme: dark;
@@ -25,156 +26,244 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { background: var(--bg); }
-body {
-  margin: 0; min-height: 100vh; color: var(--ink); font-family: var(--f);
-  -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
-  background:
-    radial-gradient(900px 500px at 85% -10%, rgba(186,138,83,.18), transparent 60%),
-    radial-gradient(700px 500px at -10% 10%, rgba(62,92,150,.22), transparent 60%),
-    var(--bg);
-  background-attachment: fixed;
-}
-main { max-width: 1080px; margin: 0 auto; padding: calc(32px + env(safe-area-inset-top, 0px)) 16px 24px; }
+body { margin: 0; min-height: 100vh; color: var(--ink); font-family: var(--f); background: var(--bg); overflow-x: hidden;
+  -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
 
-/* Kopf */
-header { display: flex; align-items: center; gap: 16px; }
-.logo { width: 52px; height: 52px; border-radius: 16px; flex: none; display: grid; place-items: center;
-  background: linear-gradient(140deg, var(--gold-hi), var(--gold) 55%, #8E6538); box-shadow: 0 10px 30px rgba(186,138,83,.35); }
-.logo svg { width: 22px; height: 22px; fill: #fff; margin-left: 3px; }
-h1 { font-size: clamp(26px, 4.4vw, 38px); font-weight: 800; letter-spacing: -.8px; margin: 0; line-height: 1.1; }
-.sub { color: var(--muted); margin: 4px 0 0; font-size: 15px; }
+/* ---------- Bewegter Hintergrund ---------- */
+.aurora { position: fixed; inset: 0; z-index: -2; overflow: hidden; pointer-events: none; }
+.aurora i { position: absolute; width: 60vmax; height: 60vmax; border-radius: 50%; filter: blur(90px); opacity: .6; mix-blend-mode: screen; }
+.aurora i:nth-child(1) { background: var(--gold); left: -15vmax; top: -20vmax; animation: drift1 22s ease-in-out infinite alternate; }
+.aurora i:nth-child(2) { background: var(--violet); right: -20vmax; top: -10vmax; opacity: .45; animation: drift2 26s ease-in-out infinite alternate; }
+.aurora i:nth-child(3) { background: var(--cyan); left: 20vmax; bottom: -35vmax; opacity: .22; animation: drift3 30s ease-in-out infinite alternate; }
+@keyframes drift1 { to { transform: translate(18vmax, 12vmax) scale(1.15); } }
+@keyframes drift2 { to { transform: translate(-16vmax, 18vmax) scale(.9); } }
+@keyframes drift3 { to { transform: translate(-14vmax, -16vmax) scale(1.2); } }
+.gridlines { position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size: 64px 64px; mask-image: radial-gradient(ellipse at 50% 0%, #000 20%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse at 50% 0%, #000 20%, transparent 75%); }
+.grain { position: fixed; inset: -50%; z-index: -1; pointer-events: none; opacity: .06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 
-/* Abschnitte */
-section { margin-top: 40px; }
-.head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
-h2 { font-size: 13px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin: 0; }
-.count { color: var(--gold-hi); }
-.link { all: unset; cursor: pointer; color: var(--gold-hi); font-size: 14px; font-weight: 600; padding: 6px 2px; }
-.link:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 6px; }
+main { max-width: 1160px; margin: 0 auto; padding: calc(28px + env(safe-area-inset-top, 0px)) 16px 24px; }
 
-/* Präsentations-Kacheln */
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 20px; }
-.tile { position: relative; display: block; text-decoration: none; color: inherit; border-radius: 20px; overflow: hidden;
-  background: var(--panel); border: 1px solid var(--line); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  transition: transform .35s var(--ease), border-color .35s, box-shadow .35s; animation: rise .6s var(--ease) both; }
-.tile:hover { transform: translateY(-4px); border-color: var(--line-2); box-shadow: 0 24px 50px rgba(0,0,0,.35); }
-.tile:active { transform: scale(.985); }
-.tile:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
-@keyframes rise { from { opacity: 0; transform: translateY(14px); } }
-.thumb { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: #0E1729; }
+/* ---------- Kopf ---------- */
+nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: -.2px; font-size: 17px; }
+.logo { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; position: relative;
+  background: linear-gradient(140deg, var(--gold-hi), var(--gold) 50%, #8A5A2B); box-shadow: 0 0 0 1px rgba(255,255,255,.15) inset, 0 10px 30px rgba(200,149,90,.45); }
+.logo svg { width: 16px; height: 16px; fill: #fff; margin-left: 2px; }
+.live { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--muted); padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255,255,255,.03); }
+.live::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 rgba(110,231,168,.6); animation: ping 2s infinite; }
+@keyframes ping { 70% { box-shadow: 0 0 0 10px rgba(110,231,168,0); } 100% { box-shadow: 0 0 0 0 rgba(110,231,168,0); } }
+
+.hero { padding: clamp(40px, 9vw, 96px) 0 clamp(24px, 5vw, 48px); text-align: center; }
+.eyebrow { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .3em; text-transform: uppercase; color: var(--gold-hi);
+  padding: 8px 16px; border-radius: 999px; border: 1px solid rgba(240,196,138,.3); background: rgba(240,196,138,.06); }
+h1 { margin: 22px 0 0; font-size: clamp(44px, 10vw, 112px); font-weight: 800; letter-spacing: -.045em; line-height: .95;
+  background: linear-gradient(100deg, #fff 0%, #fff 30%, var(--gold-hi) 50%, #fff 70%, #fff 100%); background-size: 250% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent; animation: sheen 6s ease-in-out infinite; }
+@keyframes sheen { 0%, 100% { background-position: 100% 0; } 50% { background-position: 0 0; } }
+.lead { max-width: 560px; margin: 20px auto 0; color: var(--muted); font-size: clamp(16px, 2.2vw, 19px); line-height: 1.55; }
+.cta { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 30px; }
+.btn { all: unset; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 10px; font-weight: 700; font-size: 16px; padding: 15px 26px; border-radius: 14px; transition: transform .2s var(--ease), filter .2s, background .2s; }
+.btn svg { width: 16px; height: 16px; fill: currentColor; }
+.btn.primary { color: #1A1206; background: linear-gradient(140deg, var(--gold-hi), var(--gold)); box-shadow: 0 0 0 1px rgba(255,255,255,.2) inset, 0 14px 40px rgba(200,149,90,.45); }
+.btn.primary:hover { filter: brightness(1.08); transform: translateY(-2px); }
+.btn.ghost { color: var(--ink); background: rgba(255,255,255,.05); border: 1px solid var(--line-2); }
+.btn.ghost:hover { background: rgba(255,255,255,.1); }
+.btn:active { transform: scale(.97); }
+.btn:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 3px; }
+.btn[disabled] { opacity: .5; pointer-events: none; }
+
+/* ---------- Abschnitte ---------- */
+section { margin-top: 56px; scroll-margin-top: 24px; }
+.head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+h2 { margin: 0; font-size: clamp(22px, 3vw, 30px); font-weight: 800; letter-spacing: -.6px; }
+h2 .count { font-size: .55em; vertical-align: middle; margin-left: 8px; padding: 4px 10px; border-radius: 999px; color: var(--gold-hi); background: rgba(240,196,138,.1); border: 1px solid rgba(240,196,138,.25); letter-spacing: 0; }
+.link { all: unset; cursor: pointer; color: var(--gold-hi); font-size: 14px; font-weight: 600; padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(240,196,138,.3); }
+.link:hover { background: rgba(240,196,138,.08); }
+.link:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* ---------- Kacheln ---------- */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 22px; perspective: 1200px; }
+.tile { --rx: 0deg; --ry: 0deg; position: relative; display: block; text-decoration: none; color: inherit; border-radius: 22px;
+  transform: rotateX(var(--rx)) rotateY(var(--ry)); transform-style: preserve-3d; transition: transform .25s var(--ease); animation: rise .7s var(--ease) both; }
+.tile:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 4px; }
+/* leuchtender, rotierender Rand */
+.tile::before { content: ""; position: absolute; inset: -1px; border-radius: 23px; padding: 1px; z-index: 0;
+  background: conic-gradient(from var(--a, 0deg), transparent 0 60%, var(--gold-hi) 75%, var(--violet) 85%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+  opacity: 0; transition: opacity .4s; animation: spin 4s linear infinite; }
+.tile:hover::before, .tile.featured::before { opacity: 1; }
+@property --a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes spin { to { --a: 360deg; } }
+.card { position: relative; z-index: 1; border-radius: 22px; overflow: hidden; background: var(--panel); border: 1px solid var(--line);
+  backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); box-shadow: 0 30px 60px -30px rgba(0,0,0,.7); transition: box-shadow .4s; }
+.tile:hover .card { box-shadow: 0 40px 80px -30px rgba(0,0,0,.85), 0 0 60px -20px rgba(200,149,90,.45); }
+@keyframes rise { from { opacity: 0; transform: translateY(24px) scale(.97); } }
+.thumb { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: #0B1220; }
 .thumb iframe { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; border: 0; transform-origin: 0 0; pointer-events: none; background: #fff; }
-.thumb::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgba(11,18,32,.55)); }
-.playbtn { position: absolute; z-index: 2; right: 14px; bottom: 14px; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center;
-  background: var(--gold); box-shadow: 0 8px 24px rgba(0,0,0,.35); transition: transform .3s var(--ease), background .2s; }
-.playbtn svg { width: 18px; height: 18px; fill: #fff; margin-left: 3px; }
-.tile:hover .playbtn { transform: scale(1.08); background: var(--gold-hi); }
-.info { padding: 14px 18px 16px; display: flex; align-items: center; gap: 12px; }
+.thumb::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 50%, rgba(5,8,15,.7)); }
+/* Glanz, der beim Hover über die Kachel läuft */
+.shine { position: absolute; inset: 0; z-index: 2; pointer-events: none; background: linear-gradient(110deg, transparent 35%, rgba(255,255,255,.18) 50%, transparent 65%); transform: translateX(-120%); }
+.tile:hover .shine { transition: transform 1s var(--ease); transform: translateX(120%); }
+.playbtn { position: absolute; z-index: 3; left: 50%; top: 50%; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; display: grid; place-items: center;
+  background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.35); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  opacity: 0; transform: scale(.8); transition: opacity .3s, transform .4s var(--ease), background .3s; }
+.playbtn svg { width: 22px; height: 22px; fill: #fff; margin-left: 4px; }
+.tile:hover .playbtn, .tile:focus-visible .playbtn { opacity: 1; transform: scale(1); }
+.tile:hover .playbtn { background: var(--gold); border-color: var(--gold-hi); }
+@media (hover: none) { .playbtn { opacity: 1; transform: scale(.85); } }
+.badge { position: absolute; z-index: 3; left: 14px; top: 14px; font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase;
+  padding: 6px 10px; border-radius: 999px; color: #1A1206; background: linear-gradient(140deg, var(--gold-hi), var(--gold)); box-shadow: 0 6px 20px rgba(200,149,90,.5); }
+.info { padding: 16px 18px 18px; display: flex; align-items: center; gap: 12px; }
 .info div { flex: 1; min-width: 0; }
-.info b { display: block; font-size: 17px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.info b { display: block; font-size: 18px; font-weight: 700; letter-spacing: -.2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .info span { color: var(--muted); font-size: 13px; }
-.del { all: unset; cursor: pointer; color: var(--danger); font-size: 14px; font-weight: 600; padding: 8px 12px; border-radius: 999px; border: 1px solid rgba(229,115,115,.4); }
-.del:hover { background: rgba(229,115,115,.12); }
-.empty { color: var(--muted); background: var(--panel); border: 1px dashed var(--line-2); border-radius: 20px; padding: 40px 20px; text-align: center; }
+.del { all: unset; cursor: pointer; color: var(--danger); font-size: 14px; font-weight: 600; padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(255,107,107,.45); background: rgba(255,107,107,.08); }
+.del:hover { background: rgba(255,107,107,.18); }
+/* neueste Präsentation groß */
+.tile.featured { grid-column: 1 / -1; }
+.tile.featured .info b { font-size: clamp(20px, 3vw, 30px); }
+.tile.featured .playbtn { width: 84px; height: 84px; margin: -42px 0 0 -42px; }
+.tile.featured .playbtn svg { width: 28px; height: 28px; }
+@media (min-width: 760px) { .tile.featured .thumb { aspect-ratio: 21 / 9; } }
+.empty { color: var(--muted); background: var(--panel); border: 1px dashed var(--line-2); border-radius: 22px; padding: 48px 20px; text-align: center; }
 
-/* Upload */
-.upload { background: var(--panel); border: 1px solid var(--line); border-radius: 24px; padding: 20px; display: grid; gap: 14px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-.drop { display: grid; place-items: center; gap: 6px; text-align: center; padding: 34px 16px; border-radius: 18px; cursor: pointer;
-  border: 2px dashed var(--line-2); background: rgba(11,18,32,.45); transition: border-color .2s, background .2s; }
-.drop:hover, .drop.over { border-color: var(--gold); background: rgba(186,138,83,.08); }
+/* ---------- Upload ---------- */
+.upload { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 26px; padding: 22px; display: grid; gap: 14px;
+  backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); }
+.drop { position: relative; display: grid; place-items: center; gap: 8px; text-align: center; padding: 44px 16px; border-radius: 20px; cursor: pointer; overflow: hidden;
+  background: radial-gradient(400px 160px at 50% 0%, rgba(200,149,90,.12), transparent 70%), rgba(5,8,15,.5); border: 2px dashed var(--line-2); transition: border-color .25s, background .25s, transform .25s var(--ease); }
+.drop:hover, .drop.over { border-color: var(--gold-hi); transform: scale(1.01); }
+.drop.over { background: radial-gradient(500px 200px at 50% 0%, rgba(200,149,90,.25), transparent 70%), rgba(5,8,15,.5); }
 .drop.has { border-style: solid; border-color: var(--gold); }
 .drop input { display: none; }
-.drop svg { width: 34px; height: 34px; fill: var(--gold-hi); }
-.drop strong { font-size: 17px; }
+.icon { width: 64px; height: 64px; border-radius: 18px; display: grid; place-items: center; background: linear-gradient(140deg, rgba(240,196,138,.25), rgba(200,149,90,.08)); border: 1px solid rgba(240,196,138,.3); animation: bob 3s ease-in-out infinite; }
+.icon svg { width: 30px; height: 30px; fill: var(--gold-hi); }
+@keyframes bob { 50% { transform: translateY(-6px); } }
+.drop strong { font-size: 19px; margin-top: 6px; }
 .drop small { color: var(--muted); font-size: 14px; }
 .row { display: flex; gap: 12px; flex-wrap: wrap; }
-.row input { flex: 1 1 220px; font: inherit; font-size: 16px; color: var(--ink); background: rgba(11,18,32,.6); border: 1px solid var(--line-2); border-radius: 14px; padding: 14px 16px; }
-.row input::placeholder { color: #6F7D92; }
+.row input { flex: 1 1 240px; font: inherit; font-size: 16px; color: var(--ink); background: rgba(5,8,15,.6); border: 1px solid var(--line-2); border-radius: 14px; padding: 15px 16px; }
+.row input::placeholder { color: #6E7B90; }
 input:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
-.btn { all: unset; cursor: pointer; flex: 0 0 auto; text-align: center; font-weight: 700; color: #fff; padding: 14px 26px; border-radius: 14px;
-  background: linear-gradient(140deg, var(--gold-hi), var(--gold)); box-shadow: 0 10px 24px rgba(186,138,83,.25); transition: transform .2s, filter .2s; }
-.btn:hover { filter: brightness(1.08); }
-.btn:active { transform: scale(.98); }
-.btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-.btn[disabled] { opacity: .5; pointer-events: none; }
 .msg { font-size: 14px; margin: 0; min-height: 1.2em; }
 .msg.err { color: var(--danger); } .msg.ok { color: var(--ok); }
+.bar { height: 4px; border-radius: 4px; background: rgba(255,255,255,.08); overflow: hidden; }
+.bar i { display: block; height: 100%; width: 40%; border-radius: 4px; background: linear-gradient(90deg, var(--gold), var(--gold-hi)); animation: load 1.1s ease-in-out infinite; }
+@keyframes load { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
 
-/* AirPlay-Schritte */
-.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 14px; }
-.step { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 18px; }
-.step i { font-style: normal; display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: rgba(186,138,83,.16); color: var(--gold-hi); font-weight: 800; font-size: 14px; }
-.step b { display: block; margin: 12px 0 4px; font-size: 16px; }
-.step p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+/* ---------- Schritte ---------- */
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 16px; counter-reset: s; }
+.step { position: relative; overflow: hidden; background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 22px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); transition: transform .3s var(--ease), border-color .3s; }
+.step:hover { transform: translateY(-3px); border-color: var(--line-2); }
+.step .num { position: absolute; right: 14px; top: -6px; font-size: 88px; font-weight: 800; letter-spacing: -4px; line-height: 1; color: rgba(255,255,255,.05); pointer-events: none; }
+.step svg { width: 26px; height: 26px; fill: var(--gold-hi); }
+.step b { display: block; margin: 14px 0 6px; font-size: 17px; }
+.step p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
+.step strong { color: var(--ink); }
 
-footer { margin: 56px 0 0; padding: 22px 16px calc(22px + env(safe-area-inset-bottom, 0px)); text-align: center; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
-footer b { color: var(--ink); font-weight: 700; }
-footer .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--gold); margin-right: 8px; vertical-align: 1px; }
+/* ---------- Footer ---------- */
+footer { margin-top: 80px; padding: 28px 16px calc(28px + env(safe-area-inset-bottom, 0px)); text-align: center; border-top: 1px solid var(--line); background: linear-gradient(180deg, transparent, rgba(200,149,90,.05)); }
+.powered { display: inline-flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); padding: 10px 18px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255,255,255,.03); }
+.powered b { font-weight: 800; letter-spacing: .02em; background: linear-gradient(100deg, var(--gold-hi), #fff, var(--gold-hi)); background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent; animation: sheen 4s ease-in-out infinite; }
+.gem { width: 18px; height: 18px; }
 
-@media (max-width: 560px) { .btn { flex: 1 1 100%; } }
-@media (prefers-reduced-motion: reduce) { .tile { animation: none; transition: none; } }
+/* Scroll-Einblendung */
+.reveal { opacity: 0; transform: translateY(30px); transition: opacity .9s var(--ease), transform .9s var(--ease); }
+.reveal.in { opacity: 1; transform: none; }
+
+@media (max-width: 560px) { .row .btn { flex: 1 1 100%; } .cta .btn { flex: 1 1 100%; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before { animation: none !important; transition: none !important; }
+  .reveal { opacity: 1; transform: none; }
+}
 </style>
 </head>
 <body>
+<div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="gridlines" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
 <main>
-  <header>
-    <div class="logo" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3 1.5v13l11-6.5z"/></svg></div>
-    <div>
-      <h1>Präsentationen</h1>
-      <p class="sub">Antippen zum Starten · rechts tippen = weiter, links = zurück</p>
+  <nav>
+    <div class="brand"><div class="logo" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3 1.5v13l11-6.5z"/></svg></div>Präsentationen</div>
+    <span class="live">Online</span>
+  </nav>
+
+  <header class="hero">
+    <span class="eyebrow">Bühne frei</span>
+    <h1>Präsentationen.</h1>
+    <p class="lead">Hochladen, antippen, vorführen. Direkt auf dem iPad oder per AirPlay auf dem großen Fernseher.</p>
+    <div class="cta">
+      <a class="btn primary" id="startLatest" href="#alle"><svg viewBox="0 0 16 16"><path d="M3 1.5v13l11-6.5z"/></svg>Neueste starten</a>
+      <a class="btn ghost" href="#hochladen"><svg viewBox="0 0 24 24"><path d="M11 16V7.8l-3.6 3.6L6 10l6-6 6 6-1.4 1.4L13 7.8V16zm-6 4v-5h2v3h10v-3h2v5z"/></svg>Hochladen</a>
     </div>
   </header>
 
-  <section>
+  <section id="alle">
     <div class="head">
-      <h2>Alle Präsentationen <span class="count" id="count"></span></h2>
+      <h2>Alle Präsentationen<span class="count" id="count" hidden></span></h2>
       <button class="link" id="manage" hidden>Bearbeiten</button>
     </div>
     <div class="grid" id="list"><div class="empty">Wird geladen …</div></div>
   </section>
 
-  <section>
-    <div class="head"><h2>Neue Präsentation hochladen</h2></div>
+  <section id="hochladen" class="reveal">
+    <div class="head"><h2>Neue Präsentation</h2></div>
     <form class="upload" id="up">
       <label class="drop" id="drop">
         <input type="file" id="file" accept=".html,.htm,text/html">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 16V7.8l-3.6 3.6L6 10l6-6 6 6-1.4 1.4L13 7.8V16zm-6 4v-5h2v3h10v-3h2v5z"/></svg>
-        <strong id="dropTxt">HTML-Datei auswählen</strong>
-        <small id="dropSub">oder hierher ziehen · die Datei, die Claude dir gebaut hat</small>
+        <span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 16V7.8l-3.6 3.6L6 10l6-6 6 6-1.4 1.4L13 7.8V16zm-6 4v-5h2v3h10v-3h2v5z"/></svg></span>
+        <strong id="dropTxt">HTML-Datei hier reinziehen</strong>
+        <small id="dropSub">oder antippen zum Auswählen · die Datei, die Claude dir gebaut hat</small>
       </label>
       <div class="row">
         <input type="text" id="title" placeholder="Titel (optional)" maxlength="120" aria-label="Titel (optional)">
-        <button class="btn" id="send" type="submit">Hochladen</button>
+        <button class="btn primary" id="send" type="submit">Hochladen</button>
       </div>
+      <div class="bar" id="bar" hidden><i></i></div>
       <p class="msg" id="msg" role="status"></p>
     </form>
   </section>
 
-  <section>
-    <div class="head"><h2>Auf dem Fernseher zeigen</h2></div>
+  <section class="reveal">
+    <div class="head"><h2>So läuft's auf dem Fernseher</h2></div>
     <div class="steps">
-      <div class="step"><i>1</i><b>Verbinden</b><p>iPad und Fernseher im selben WLAN. Kontrollzentrum → <strong>Bildschirmsynchronisierung</strong> → Fernseher wählen.</p></div>
-      <div class="step"><i>2</i><b>Starten</b><p>iPad quer halten und eine Präsentation antippen. Sie passt sich automatisch an.</p></div>
-      <div class="step"><i>3</i><b>Vorführen</b><p>Rechts tippen = weiter, links = zurück. Auf den Rand tippen zeigt <strong>Schließen</strong>.</p></div>
-      <div class="step"><i>★</i><b>Tipp: als App</b><p>Safari → Teilen → <strong>Zum Home-Bildschirm</strong>. Dann ohne Browser-Leisten und X-Knopf.</p></div>
+      <div class="step"><span class="num">1</span><svg viewBox="0 0 24 24"><path d="M21 3H3a2 2 0 0 0-2 2v3h2V5h18v14h-7v2h7a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2M1 18v3h3a3 3 0 0 0-3-3m0-4v2a5 5 0 0 1 5 5h2a7 7 0 0 0-7-7m0-4v2a9 9 0 0 1 9 9h2A11 11 0 0 0 1 10"/></svg><b>Verbinden</b><p>iPad und Fernseher im selben WLAN. Kontrollzentrum → <strong>Bildschirmsynchronisierung</strong>.</p></div>
+      <div class="step"><span class="num">2</span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><b>Starten</b><p>iPad quer halten, Präsentation antippen. Sie passt sich automatisch an.</p></div>
+      <div class="step"><span class="num">3</span><svg viewBox="0 0 24 24"><path d="M9 11.2V7.5a2.5 2.5 0 0 1 5 0v3.7a4.5 4.5 0 1 0-5 0M18.8 15.6l-4.5-2.3a1 1 0 0 0-.4-.1H13V7.5a1.5 1.5 0 0 0-3 0v10.7l-3.4-.7a1 1 0 0 0-.9 1.7l4.2 4.2a1 1 0 0 0 .7.3h6.8a1 1 0 0 0 1-.9l.8-5.4a1.5 1.5 0 0 0-.4-1.8"/></svg><b>Vorführen</b><p>Rechts tippen = weiter, links = zurück. Rand antippen zeigt <strong>Schließen</strong>.</p></div>
+      <div class="step"><span class="num">★</span><svg viewBox="0 0 24 24"><path d="M12 2 9.2 8.6 2 9.2l5.5 4.7L5.8 21 12 17.3 18.2 21l-1.7-7.1L22 9.2l-7.2-.6z"/></svg><b>Profi-Tipp</b><p>Safari → Teilen → <strong>Zum Home-Bildschirm</strong>. Dann ohne Browser-Leisten.</p></div>
     </div>
   </section>
 </main>
 
-<footer><span class="dot"></span>Powered by <b>Stone Plugins</b></footer>
+<footer>
+  <span class="powered">
+    <svg class="gem" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F0C48A"/><stop offset="1" stop-color="#C8955A"/></linearGradient></defs><path fill="url(#g)" d="M6 3h12l4 6-10 12L2 9z"/></svg>
+    Powered by <b>Stone Plugins</b>
+  </span>
+</footer>
 
 <script>
 const $ = (id) => document.getElementById(id);
 const PLAY = '<svg viewBox="0 0 16 16"><path d="M3 1.5v13l11-6.5z"/></svg>';
+const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 let managing = false;
 
 function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 function fmtDate(d) { const m = /^(\d{4})-(\d\d)-(\d\d)/.exec(d || ""); return m ? `${m[3]}.${m[2]}.${m[1]}` : ""; }
 
-// Vorschau: die Präsentation verkleinert in der Kachel (1920x1080 auf Kachelbreite)
+// Vorschau: Präsentation (1920x1080) passend in die Kachel skalieren, bei breiten Kacheln vertikal zentriert
 const ro = new ResizeObserver((entries) => {
   for (const e of entries) {
     const f = e.target.querySelector("iframe");
-    if (f) f.style.transform = `scale(${e.contentRect.width / 1920})`;
+    if (!f) continue;
+    const k = e.contentRect.width / 1920, dy = (e.contentRect.height - 1080 * k) / 2;
+    f.style.top = "0px";
+    f.style.transform = `translateY(${dy}px) scale(${k})`;
   }
 });
 
@@ -185,22 +274,46 @@ async function load() {
     if (r.ok) items = await r.json();
   } catch (e) {}
   $("manage").hidden = !items.length;
-  $("count").textContent = items.length ? `· ${items.length}` : "";
+  $("count").hidden = !items.length;
+  $("count").textContent = items.length;
+  $("startLatest").href = items.length ? `/play.html?id=${encodeURIComponent(items[0].id)}` : "#hochladen";
   ro.disconnect();
   if (!items.length) { $("list").innerHTML = '<div class="empty">Noch keine Präsentation da. Lade unten die erste hoch.</div>'; return; }
   $("list").innerHTML = items.map((i, n) => `
-    <a class="tile" href="/play.html?id=${encodeURIComponent(i.id)}" style="animation-delay:${Math.min(n, 8) * 60}ms">
-      <div class="thumb">
-        <iframe src="/p/${encodeURIComponent(i.id)}.html" loading="lazy" tabindex="-1" aria-hidden="true" title=""></iframe>
-        <span class="playbtn">${PLAY}</span>
-      </div>
-      <div class="info">
-        <div><b>${esc(i.title)}</b><span>${fmtDate(i.date)}</span></div>
-        ${managing ? `<button class="del" data-id="${esc(i.id)}" data-title="${esc(i.title)}">Löschen</button>` : ""}
+    <a class="tile${n === 0 ? " featured" : ""}" href="/play.html?id=${encodeURIComponent(i.id)}" style="animation-delay:${Math.min(n, 8) * 80}ms">
+      <div class="card">
+        <div class="thumb">
+          <iframe src="/p/${encodeURIComponent(i.id)}.html" loading="lazy" tabindex="-1" aria-hidden="true" title=""></iframe>
+          ${n === 0 ? '<span class="badge">Neu</span>' : ""}
+          <span class="shine"></span>
+          <span class="playbtn">${PLAY}</span>
+        </div>
+        <div class="info">
+          <div><b>${esc(i.title)}</b><span>${fmtDate(i.date)}</span></div>
+          ${managing ? `<button class="del" data-id="${esc(i.id)}" data-title="${esc(i.title)}">Löschen</button>` : ""}
+        </div>
       </div>
     </a>`).join("");
   document.querySelectorAll(".thumb").forEach((t) => ro.observe(t));
 }
+
+// 3D-Kippen der Kacheln mit der Maus
+if (!reduce) {
+  $("list").addEventListener("pointermove", (e) => {
+    if (e.pointerType !== "mouse") return;
+    const t = e.target.closest(".tile"); if (!t) return;
+    const r = t.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+    const amp = t.classList.contains("featured") ? 3 : 7;
+    t.style.setProperty("--rx", `${-y * amp}deg`); t.style.setProperty("--ry", `${x * amp}deg`);
+  });
+  $("list").addEventListener("pointerout", (e) => {
+    const t = e.target.closest(".tile"); if (t && !t.contains(e.relatedTarget)) { t.style.setProperty("--rx", "0deg"); t.style.setProperty("--ry", "0deg"); }
+  });
+}
+
+// Abschnitte beim Scrollen einblenden
+const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: .12 });
+document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
 
 $("list").addEventListener("click", async (e) => {
   const b = e.target.closest(".del");
@@ -217,8 +330,8 @@ $("manage").addEventListener("click", () => { managing = !managing; $("manage").
 
 function showFile() {
   const f = $("file").files[0];
-  $("dropTxt").textContent = f ? f.name : "HTML-Datei auswählen";
-  $("dropSub").textContent = f ? "Bereit zum Hochladen" : "oder hierher ziehen · die Datei, die Claude dir gebaut hat";
+  $("dropTxt").textContent = f ? f.name : "HTML-Datei hier reinziehen";
+  $("dropSub").textContent = f ? "Bereit. Jetzt auf „Hochladen“ tippen." : "oder antippen zum Auswählen · die Datei, die Claude dir gebaut hat";
   $("drop").classList.toggle("has", !!f);
 }
 $("file").addEventListener("change", showFile);
@@ -234,19 +347,20 @@ $("up").addEventListener("submit", async (e) => {
   const f = $("file").files[0], msg = $("msg");
   msg.className = "msg";
   if (!f) { msg.textContent = "Bitte zuerst eine Datei auswählen."; msg.classList.add("err"); return; }
-  $("send").disabled = true; msg.textContent = "Wird hochgeladen …";
+  $("send").disabled = true; $("bar").hidden = false; msg.textContent = "Wird hochgeladen …";
   try {
     const r = await fetch("/api/upload?title=" + encodeURIComponent($("title").value.trim()), {
       method: "POST", headers: { "Content-Type": "text/html" }, body: f,
     });
     const j = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(j.error || (r.status === 413 ? "Datei zu groß" : r.status === 404 || r.status === 502 ? "Upload-Dienst nicht erreichbar" : "Upload fehlgeschlagen"));
-    msg.textContent = "Fertig! Die Präsentation steht jetzt oben in der Liste."; msg.classList.add("ok");
+    msg.textContent = "Fertig! Die Präsentation steht jetzt ganz oben."; msg.classList.add("ok");
     $("up").reset(); showFile();
-    load();
+    await load();
+    $("alle").scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
   } catch (err) {
     msg.textContent = err.message; msg.classList.add("err");
-  } finally { $("send").disabled = false; }
+  } finally { $("send").disabled = false; $("bar").hidden = true; }
 });
 
 load();

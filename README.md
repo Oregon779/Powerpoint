@@ -19,7 +19,7 @@ CLAUDE-PROMPT.md             Vorlage, um bei Claude neue Präsentationen zu best
 
 ```bash
 git clone -b claude/beautiful-sagan-hqqclj https://github.com/oregon779/powerpoint.git && cd powerpoint
-sudo bash deploy/install.sh powerpoint.stoneuniverse.de <UPLOAD-PASSWORT> [E-MAIL]
+sudo bash deploy/install.sh powerpoint.stoneuniverse.de [E-MAIL]
 ```
 
 Danach läuft die Seite unter `https://powerpoint.stoneuniverse.de/`. Statt der Domain geht
@@ -34,8 +34,9 @@ ein Zertifikat abläuft (certbot erneuert es aber ohnehin automatisch). Das Skri
 - holt bei einer Domain mit certbot ein kostenloses HTTPS-Zertifikat und leitet http auf https um,
 - testet die Seite mit curl.
 
-Ansehen kann jeder mit dem Link. Hochladen und Löschen geht nur mit dem Passwort.
-Passwort ändern: `/etc/praesentationen.env` bearbeiten, dann `sudo systemctl restart praesentationen`.
+Es gibt kein Passwort: Jeder mit dem Link kann ansehen, hochladen und löschen.
+Passwort wieder einschalten: in `/etc/praesentationen.env` die Zeile `PRAES_PASSWORD=...` eintragen,
+dann `sudo systemctl restart praesentationen` (die Startseite fragt dann aber noch nicht danach).
 
 ## Hinweis
 

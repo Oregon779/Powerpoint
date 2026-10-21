@@ -8,102 +8,175 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Präsentationen">
 <link rel="manifest" href="/manifest.webmanifest">
-<meta name="theme-color" content="#0D1524">
+<meta name="theme-color" content="#0B1220">
 <title>Präsentationen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
 <style>
 :root {
-  --bg: #0D1524; --panel: #16223A; --panel-2: #1D2B44; --line: rgba(201,209,220,.16);
-  --ink: #F1F4F8; --muted: #9AA7BA; --gold: #BA8A53; --gold-hi: #D3A874; --danger: #E06C6C;
-  --f: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --bg: #0B1220; --panel: rgba(22,34,58,.72); --panel-solid: #16223A; --panel-2: #1D2B44;
+  --line: rgba(201,209,220,.13); --line-2: rgba(201,209,220,.24);
+  --ink: #F3F5F9; --muted: #95A3B8; --gold: #BA8A53; --gold-hi: #D9AE78; --danger: #E57373; --ok: #7BC59A;
+  --f: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --ease: cubic-bezier(.2,.75,.2,1);
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f); -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
-main { max-width: 760px; margin: 0 auto; padding: calc(28px + env(safe-area-inset-top, 0px)) 16px calc(48px + env(safe-area-inset-bottom, 0px)); }
-h1 { font-size: 30px; font-weight: 800; letter-spacing: -.5px; margin: 0; }
-.kicker { color: var(--gold); font-size: 13px; font-weight: 700; letter-spacing: .24em; text-transform: uppercase; margin: 0 0 6px; }
-.sub { color: var(--muted); margin: 6px 0 0; font-size: 15px; line-height: 1.45; }
-section { margin-top: 28px; }
-h2 { font-size: 13px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; display: flex; justify-content: space-between; align-items: center; }
-.list { display: grid; gap: 10px; }
-.item { display: flex; align-items: center; gap: 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px; text-decoration: none; color: inherit; transition: background .15s; }
-.item:active, .item:hover { background: var(--panel-2); }
-.play { width: 46px; height: 46px; border-radius: 50%; background: var(--gold); display: grid; place-items: center; flex: none; }
-.play svg { width: 18px; height: 18px; fill: #fff; margin-left: 3px; }
-.meta { flex: 1; min-width: 0; }
-.meta b { display: block; font-size: 17px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.meta span { color: var(--muted); font-size: 13px; }
-.del { all: unset; cursor: pointer; color: var(--danger); font-size: 14px; font-weight: 600; padding: 10px 6px; }
-.empty { color: var(--muted); background: var(--panel); border: 1px dashed var(--line); border-radius: 16px; padding: 22px; text-align: center; }
-.card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: grid; gap: 12px; }
-label { font-size: 14px; color: var(--muted); display: grid; gap: 6px; }
-input[type=text], input[type=password] { font: inherit; font-size: 16px; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px; width: 100%; }
-input:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
-.drop { border: 2px dashed var(--line); border-radius: 12px; padding: 20px; text-align: center; color: var(--muted); cursor: pointer; }
-.drop.has { border-color: var(--gold); color: var(--ink); }
+[hidden] { display: none !important; }
+html { background: var(--bg); }
+body {
+  margin: 0; min-height: 100vh; color: var(--ink); font-family: var(--f);
+  -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+  background:
+    radial-gradient(900px 500px at 85% -10%, rgba(186,138,83,.18), transparent 60%),
+    radial-gradient(700px 500px at -10% 10%, rgba(62,92,150,.22), transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
+}
+main { max-width: 1080px; margin: 0 auto; padding: calc(32px + env(safe-area-inset-top, 0px)) 16px 24px; }
+
+/* Kopf */
+header { display: flex; align-items: center; gap: 16px; }
+.logo { width: 52px; height: 52px; border-radius: 16px; flex: none; display: grid; place-items: center;
+  background: linear-gradient(140deg, var(--gold-hi), var(--gold) 55%, #8E6538); box-shadow: 0 10px 30px rgba(186,138,83,.35); }
+.logo svg { width: 22px; height: 22px; fill: #fff; margin-left: 3px; }
+h1 { font-size: clamp(26px, 4.4vw, 38px); font-weight: 800; letter-spacing: -.8px; margin: 0; line-height: 1.1; }
+.sub { color: var(--muted); margin: 4px 0 0; font-size: 15px; }
+
+/* Abschnitte */
+section { margin-top: 40px; }
+.head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+h2 { font-size: 13px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.count { color: var(--gold-hi); }
+.link { all: unset; cursor: pointer; color: var(--gold-hi); font-size: 14px; font-weight: 600; padding: 6px 2px; }
+.link:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 6px; }
+
+/* Präsentations-Kacheln */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 20px; }
+.tile { position: relative; display: block; text-decoration: none; color: inherit; border-radius: 20px; overflow: hidden;
+  background: var(--panel); border: 1px solid var(--line); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  transition: transform .35s var(--ease), border-color .35s, box-shadow .35s; animation: rise .6s var(--ease) both; }
+.tile:hover { transform: translateY(-4px); border-color: var(--line-2); box-shadow: 0 24px 50px rgba(0,0,0,.35); }
+.tile:active { transform: scale(.985); }
+.tile:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+.thumb { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: #0E1729; }
+.thumb iframe { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; border: 0; transform-origin: 0 0; pointer-events: none; background: #fff; }
+.thumb::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgba(11,18,32,.55)); }
+.playbtn { position: absolute; z-index: 2; right: 14px; bottom: 14px; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--gold); box-shadow: 0 8px 24px rgba(0,0,0,.35); transition: transform .3s var(--ease), background .2s; }
+.playbtn svg { width: 18px; height: 18px; fill: #fff; margin-left: 3px; }
+.tile:hover .playbtn { transform: scale(1.08); background: var(--gold-hi); }
+.info { padding: 14px 18px 16px; display: flex; align-items: center; gap: 12px; }
+.info div { flex: 1; min-width: 0; }
+.info b { display: block; font-size: 17px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.info span { color: var(--muted); font-size: 13px; }
+.del { all: unset; cursor: pointer; color: var(--danger); font-size: 14px; font-weight: 600; padding: 8px 12px; border-radius: 999px; border: 1px solid rgba(229,115,115,.4); }
+.del:hover { background: rgba(229,115,115,.12); }
+.empty { color: var(--muted); background: var(--panel); border: 1px dashed var(--line-2); border-radius: 20px; padding: 40px 20px; text-align: center; }
+
+/* Upload */
+.upload { background: var(--panel); border: 1px solid var(--line); border-radius: 24px; padding: 20px; display: grid; gap: 14px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.drop { display: grid; place-items: center; gap: 6px; text-align: center; padding: 34px 16px; border-radius: 18px; cursor: pointer;
+  border: 2px dashed var(--line-2); background: rgba(11,18,32,.45); transition: border-color .2s, background .2s; }
+.drop:hover, .drop.over { border-color: var(--gold); background: rgba(186,138,83,.08); }
+.drop.has { border-style: solid; border-color: var(--gold); }
 .drop input { display: none; }
-.btn { all: unset; cursor: pointer; text-align: center; background: var(--gold); color: #fff; font-weight: 700; border-radius: 12px; padding: 14px; }
-.btn:hover { background: var(--gold-hi); }
+.drop svg { width: 34px; height: 34px; fill: var(--gold-hi); }
+.drop strong { font-size: 17px; }
+.drop small { color: var(--muted); font-size: 14px; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; }
+.row input { flex: 1 1 220px; font: inherit; font-size: 16px; color: var(--ink); background: rgba(11,18,32,.6); border: 1px solid var(--line-2); border-radius: 14px; padding: 14px 16px; }
+.row input::placeholder { color: #6F7D92; }
+input:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
+.btn { all: unset; cursor: pointer; flex: 0 0 auto; text-align: center; font-weight: 700; color: #fff; padding: 14px 26px; border-radius: 14px;
+  background: linear-gradient(140deg, var(--gold-hi), var(--gold)); box-shadow: 0 10px 24px rgba(186,138,83,.25); transition: transform .2s, filter .2s; }
+.btn:hover { filter: brightness(1.08); }
+.btn:active { transform: scale(.98); }
+.btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .btn[disabled] { opacity: .5; pointer-events: none; }
-.link { all: unset; cursor: pointer; color: var(--gold-hi); font-size: 13px; letter-spacing: 0; text-transform: none; font-weight: 600; }
-.msg { font-size: 14px; min-height: 1em; margin: 0; }
-.msg.err { color: var(--danger); } .msg.ok { color: #7BC59A; }
-details { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 4px 18px; }
-summary { cursor: pointer; padding: 12px 0; font-weight: 600; }
-details ol { margin: 0 0 14px; padding-left: 20px; color: var(--muted); line-height: 1.6; font-size: 15px; }
-details b { color: var(--ink); }
+.msg { font-size: 14px; margin: 0; min-height: 1.2em; }
+.msg.err { color: var(--danger); } .msg.ok { color: var(--ok); }
+
+/* AirPlay-Schritte */
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 14px; }
+.step { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 18px; }
+.step i { font-style: normal; display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: rgba(186,138,83,.16); color: var(--gold-hi); font-weight: 800; font-size: 14px; }
+.step b { display: block; margin: 12px 0 4px; font-size: 16px; }
+.step p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+
+footer { margin: 56px 0 0; padding: 22px 16px calc(22px + env(safe-area-inset-bottom, 0px)); text-align: center; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
+footer b { color: var(--ink); font-weight: 700; }
+footer .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--gold); margin-right: 8px; vertical-align: 1px; }
+
+@media (max-width: 560px) { .btn { flex: 1 1 100%; } }
+@media (prefers-reduced-motion: reduce) { .tile { animation: none; transition: none; } }
 </style>
 </head>
 <body>
 <main>
-  <p class="kicker">Präsentationen</p>
-  <h1>Unsere Präsentationen</h1>
-  <p class="sub">Antippen zum Öffnen. In der Präsentation: rechts tippen = weiter, links tippen = zurück.</p>
+  <header>
+    <div class="logo" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3 1.5v13l11-6.5z"/></svg></div>
+    <div>
+      <h1>Präsentationen</h1>
+      <p class="sub">Antippen zum Starten · rechts tippen = weiter, links = zurück</p>
+    </div>
+  </header>
 
   <section>
-    <h2><span>Alle Präsentationen</span><button class="link" id="manage" hidden>Verwalten</button></h2>
-    <div class="list" id="list"><div class="empty">Wird geladen …</div></div>
+    <div class="head">
+      <h2>Alle Präsentationen <span class="count" id="count"></span></h2>
+      <button class="link" id="manage" hidden>Bearbeiten</button>
+    </div>
+    <div class="grid" id="list"><div class="empty">Wird geladen …</div></div>
   </section>
 
   <section>
-    <details>
-      <summary>So präsentierst du auf dem Fernseher (AirPlay)</summary>
-      <ol>
-        <li>iPhone/iPad und Apple TV bzw. AirPlay-Fernseher im <b>selben WLAN</b>.</li>
-        <li>Kontrollzentrum öffnen → <b>Bildschirmsynchronisierung</b> → Fernseher wählen.</li>
-        <li>Diese Seite öffnen, Präsentation antippen. Gerät <b>quer</b> halten.</li>
-        <li><b>Rechts tippen</b> oder nach links wischen = nächste Folie, <b>links tippen</b> = zurück.</li>
-        <li><b>Ohne X-Knopf und Browser-Leisten:</b> in Safari <b>Teilen → Zum Home-Bildschirm</b> („Als Web-App öffnen“ eingeschaltet lassen) und die Seite immer über das neue Symbol starten.</li>
-      </ol>
-    </details>
-  </section>
-
-  <section>
-    <h2><span>Neue Präsentation hochladen</span></h2>
-    <form class="card" id="up">
+    <div class="head"><h2>Neue Präsentation hochladen</h2></div>
+    <form class="upload" id="up">
       <label class="drop" id="drop">
         <input type="file" id="file" accept=".html,.htm,text/html">
-        <span id="dropTxt">HTML-Datei von Claude auswählen</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 16V7.8l-3.6 3.6L6 10l6-6 6 6-1.4 1.4L13 7.8V16zm-6 4v-5h2v3h10v-3h2v5z"/></svg>
+        <strong id="dropTxt">HTML-Datei auswählen</strong>
+        <small id="dropSub">oder hierher ziehen · die Datei, die Claude dir gebaut hat</small>
       </label>
-      <label>Titel (optional)<input type="text" id="title" placeholder="wird sonst aus der Datei übernommen" maxlength="120"></label>
-      <label>Passwort<input type="password" id="pw" autocomplete="current-password" required></label>
-      <button class="btn" id="send" type="submit">Hochladen</button>
+      <div class="row">
+        <input type="text" id="title" placeholder="Titel (optional)" maxlength="120" aria-label="Titel (optional)">
+        <button class="btn" id="send" type="submit">Hochladen</button>
+      </div>
       <p class="msg" id="msg" role="status"></p>
     </form>
   </section>
+
+  <section>
+    <div class="head"><h2>Auf dem Fernseher zeigen</h2></div>
+    <div class="steps">
+      <div class="step"><i>1</i><b>Verbinden</b><p>iPad und Fernseher im selben WLAN. Kontrollzentrum → <strong>Bildschirmsynchronisierung</strong> → Fernseher wählen.</p></div>
+      <div class="step"><i>2</i><b>Starten</b><p>iPad quer halten und eine Präsentation antippen. Sie passt sich automatisch an.</p></div>
+      <div class="step"><i>3</i><b>Vorführen</b><p>Rechts tippen = weiter, links = zurück. Auf den Rand tippen zeigt <strong>Schließen</strong>.</p></div>
+      <div class="step"><i>★</i><b>Tipp: als App</b><p>Safari → Teilen → <strong>Zum Home-Bildschirm</strong>. Dann ohne Browser-Leisten und X-Knopf.</p></div>
+    </div>
+  </section>
 </main>
+
+<footer><span class="dot"></span>Powered by <b>Stone Plugins</b></footer>
 
 <script>
 const $ = (id) => document.getElementById(id);
 const PLAY = '<svg viewBox="0 0 16 16"><path d="M3 1.5v13l11-6.5z"/></svg>';
 let managing = false;
 
-function getPw() { try { return sessionStorage.getItem("pw") || ""; } catch (e) { return ""; } }
-function setPw(v) { try { sessionStorage.setItem("pw", v); } catch (e) {} }
-$("pw").value = getPw();
-
 function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 function fmtDate(d) { const m = /^(\d{4})-(\d\d)-(\d\d)/.exec(d || ""); return m ? `${m[3]}.${m[2]}.${m[1]}` : ""; }
+
+// Vorschau: die Präsentation verkleinert in der Kachel (1920x1080 auf Kachelbreite)
+const ro = new ResizeObserver((entries) => {
+  for (const e of entries) {
+    const f = e.target.querySelector("iframe");
+    if (f) f.style.transform = `scale(${e.contentRect.width / 1920})`;
+  }
+});
 
 async function load() {
   let items = [];
@@ -112,13 +185,21 @@ async function load() {
     if (r.ok) items = await r.json();
   } catch (e) {}
   $("manage").hidden = !items.length;
-  if (!items.length) { $("list").innerHTML = '<div class="empty">Noch keine Präsentation hochgeladen.</div>'; return; }
-  $("list").innerHTML = items.map((i) => `
-    <a class="item" href="/play.html?id=${encodeURIComponent(i.id)}">
-      <div class="play">${PLAY}</div>
-      <div class="meta"><b>${esc(i.title)}</b><span>${fmtDate(i.date)}</span></div>
-      ${managing ? `<button class="del" data-id="${esc(i.id)}" data-title="${esc(i.title)}">Löschen</button>` : ""}
+  $("count").textContent = items.length ? `· ${items.length}` : "";
+  ro.disconnect();
+  if (!items.length) { $("list").innerHTML = '<div class="empty">Noch keine Präsentation da. Lade unten die erste hoch.</div>'; return; }
+  $("list").innerHTML = items.map((i, n) => `
+    <a class="tile" href="/play.html?id=${encodeURIComponent(i.id)}" style="animation-delay:${Math.min(n, 8) * 60}ms">
+      <div class="thumb">
+        <iframe src="/p/${encodeURIComponent(i.id)}.html" loading="lazy" tabindex="-1" aria-hidden="true" title=""></iframe>
+        <span class="playbtn">${PLAY}</span>
+      </div>
+      <div class="info">
+        <div><b>${esc(i.title)}</b><span>${fmtDate(i.date)}</span></div>
+        ${managing ? `<button class="del" data-id="${esc(i.id)}" data-title="${esc(i.title)}">Löschen</button>` : ""}
+      </div>
     </a>`).join("");
+  document.querySelectorAll(".thumb").forEach((t) => ro.observe(t));
 }
 
 $("list").addEventListener("click", async (e) => {
@@ -126,20 +207,26 @@ $("list").addEventListener("click", async (e) => {
   if (!b) return;
   e.preventDefault();
   if (!confirm(`„${b.dataset.title}“ wirklich löschen?`)) return;
-  const pw = getPw() || prompt("Passwort:") || "";
-  const r = await fetch("/api/delete?id=" + encodeURIComponent(b.dataset.id), { method: "DELETE", headers: { "X-Password": pw } });
+  const r = await fetch("/api/delete?id=" + encodeURIComponent(b.dataset.id), { method: "DELETE" });
   const j = await r.json().catch(() => ({}));
   if (!r.ok) { alert(j.error || "Löschen fehlgeschlagen"); return; }
-  setPw(pw);
   load();
 });
 
-$("manage").addEventListener("click", () => { managing = !managing; $("manage").textContent = managing ? "Fertig" : "Verwalten"; load(); });
+$("manage").addEventListener("click", () => { managing = !managing; $("manage").textContent = managing ? "Fertig" : "Bearbeiten"; load(); });
 
-$("file").addEventListener("change", () => {
+function showFile() {
   const f = $("file").files[0];
-  $("dropTxt").textContent = f ? f.name : "HTML-Datei von Claude auswählen";
+  $("dropTxt").textContent = f ? f.name : "HTML-Datei auswählen";
+  $("dropSub").textContent = f ? "Bereit zum Hochladen" : "oder hierher ziehen · die Datei, die Claude dir gebaut hat";
   $("drop").classList.toggle("has", !!f);
+}
+$("file").addEventListener("change", showFile);
+["dragenter", "dragover"].forEach((t) => $("drop").addEventListener(t, (e) => { e.preventDefault(); $("drop").classList.add("over"); }));
+["dragleave", "drop"].forEach((t) => $("drop").addEventListener(t, () => $("drop").classList.remove("over")));
+$("drop").addEventListener("drop", (e) => {
+  e.preventDefault();
+  if (e.dataTransfer.files.length) { $("file").files = e.dataTransfer.files; showFile(); }
 });
 
 $("up").addEventListener("submit", async (e) => {
@@ -150,13 +237,12 @@ $("up").addEventListener("submit", async (e) => {
   $("send").disabled = true; msg.textContent = "Wird hochgeladen …";
   try {
     const r = await fetch("/api/upload?title=" + encodeURIComponent($("title").value.trim()), {
-      method: "POST", headers: { "X-Password": $("pw").value, "Content-Type": "text/html" }, body: f,
+      method: "POST", headers: { "Content-Type": "text/html" }, body: f,
     });
     const j = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(j.error || (r.status === 413 ? "Datei zu groß" : r.status === 404 || r.status === 502 ? "Upload-Dienst nicht erreichbar" : "Upload fehlgeschlagen"));
-    setPw($("pw").value);
     msg.textContent = "Fertig! Die Präsentation steht jetzt oben in der Liste."; msg.classList.add("ok");
-    $("up").reset(); $("pw").value = getPw(); $("file").dispatchEvent(new Event("change"));
+    $("up").reset(); showFile();
     load();
   } catch (err) {
     msg.textContent = err.message; msg.classList.add("err");

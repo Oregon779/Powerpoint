@@ -6,12 +6,12 @@ selbst aus; dieser Dienst nimmt nur Uploads und Löschungen an und pflegt
 die Liste (list.json).
 
 Endpunkte (alle unter /api/):
-  POST   /api/upload?title=<Titel>   Body = HTML-Datei, Header X-Password
-  DELETE /api/delete?id=<id>         Header X-Password
+  POST   /api/upload?title=<Titel>   Body = HTML-Datei
+  DELETE /api/delete?id=<id>
 
 Konfiguration über Umgebungsvariablen:
   PRAES_DIR       Ordner mit den Präsentationen (Standard /var/www/praesentationen/p)
-  PRAES_PASSWORD  Upload-Passwort (Pflicht)
+  PRAES_PASSWORD  optional: wenn gesetzt, verlangen Upload und Löschen dieses Passwort (Header X-Password)
   PRAES_PORT      Port (Standard 8090)
   PRAES_MAX_MB    maximale Dateigröße in MB (Standard 60)
 """
@@ -85,7 +85,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def authorized(self):
         given = self.headers.get("X-Password", "")
-        return bool(PASSWORD) and hmac.compare_digest(given.encode(), PASSWORD.encode())
+        if not PASSWORD:
+            return True
+        return hmac.compare_digest(given.encode(), PASSWORD.encode())
 
     def do_POST(self):
         url = self.url()
@@ -143,8 +145,6 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
-    if not PASSWORD:
-        sys.exit("PRAES_PASSWORD ist nicht gesetzt")
     os.makedirs(DIR, exist_ok=True)
     if not os.path.exists(LIST):
         write_list([])

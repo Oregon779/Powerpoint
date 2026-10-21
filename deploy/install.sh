@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
 # Richtet die Präsentations-Website auf einem Debian/Ubuntu-VPS ein.
 # Aufruf (im Repo-Ordner auf dem VPS):
-#   sudo bash deploy/install.sh <DOMAIN-ODER-IP> <UPLOAD-PASSWORT> [E-MAIL-FÜR-LETS-ENCRYPT]
+#   sudo bash deploy/install.sh <DOMAIN-ODER-IP> [E-MAIL-FÜR-LETS-ENCRYPT]
 # Bei einer Domain wird automatisch ein HTTPS-Zertifikat (certbot) geholt.
 # Bestehende nginx-Seiten werden nicht verändert; es kommt nur eine neue Datei dazu.
 set -euo pipefail
 
-SERVER_NAME="${1:?Aufruf: sudo bash deploy/install.sh <DOMAIN-ODER-IP> <UPLOAD-PASSWORT> [E-MAIL]}"
-PASSWORD="${2:?Upload-Passwort fehlt}"
-EMAIL="${3:-}"
+SERVER_NAME="${1:?Aufruf: sudo bash deploy/install.sh <DOMAIN-ODER-IP> [E-MAIL]}"
+EMAIL="${2:-}"
+# Früher war das 2. Argument ein Passwort; alles ohne @ ist keine E-Mail und wird ignoriert
+[[ "$EMAIL" == *@* ]] || EMAIL=""
 IS_DOMAIN=1
 [[ "$SERVER_NAME" =~ ^[0-9.]+$ || "$SERVER_NAME" == *:* ]] && IS_DOMAIN=0
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 WEB=/var/www/praesentationen
 CONF_NAME=praesentationen
 
-[[ "$PASSWORD" =~ ^[A-Za-z0-9._-]{4,}$ ]] || { echo "Passwort: mind. 4 Zeichen, nur Buchstaben, Ziffern, . _ -"; exit 1; }
 [ "$(id -u)" -eq 0 ] || { echo "Bitte mit sudo ausführen."; exit 1; }
 
 # 1. Pakete
@@ -59,9 +59,8 @@ if [ ! -s "$WEB/p/list.json" ]; then
 fi
 
 # 4. Upload-Dienst
-umask 077
-printf 'PRAES_PASSWORD=%s\n' "$PASSWORD" > /etc/praesentationen.env
-umask 022
+# Ohne Passwort: jeder mit dem Link darf hochladen und löschen
+printf '# PRAES_PASSWORD=... hier eintragen, um Upload/Löschen wieder zu schützen\n' > /etc/praesentationen.env
 install -m 644 "$REPO/deploy/praesentationen.service" /etc/systemd/system/praesentationen.service
 systemctl daemon-reload
 systemctl enable -q praesentationen
@@ -104,7 +103,7 @@ sleep 1
 if [ "$IS_DOMAIN" -eq 1 ]; then BASE="$SCHEME://$SERVER_NAME"; RES=(); else BASE="http://127.0.0.1"; RES=(-H "Host: $SERVER_NAME"); fi
 curl -fsS -o /dev/null -w "Startseite: HTTP %{http_code}\n" "${RES[@]}" "$BASE/" || echo "Startseite: FEHLER"
 curl -fsS -o /dev/null -w "Liste:      HTTP %{http_code}\n" "${RES[@]}" "$BASE/p/list.json" || echo "Liste: FEHLER"
-code=$(curl -s -o /dev/null -w "%{http_code}" -X POST "${RES[@]}" -H "X-Password: falsch" --data "x" "$BASE/api/upload")
-echo "Upload-Dienst (falsches Passwort soll 403 sein): HTTP $code"
+code=$(curl -s -o /dev/null -w "%{http_code}" -X POST "${RES[@]}" --data "keine html" "$BASE/api/upload")
+echo "Upload-Dienst (Test-Upload ohne HTML soll 400 sein): HTTP $code"
 echo
 echo "Fertig: $SCHEME://$SERVER_NAME/"

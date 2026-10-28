@@ -49,6 +49,9 @@ install -m 644 "$REPO/web/index.html" "$WEB/index.html"
 install -m 644 "$REPO/web/manifest.webmanifest" "$WEB/manifest.webmanifest"
 install -m 644 "$REPO/web/play.html" "$WEB/play.html"
 install -m 644 "$REPO/web/deck-tools.js" "$WEB/deck-tools.js"
+install -m 644 "$REPO/web/wartung.html" "$WEB/wartung.html"
+install -m 644 "$REPO/web/admin.html" "$WEB/admin.html"
+install -m 755 "$REPO/deploy/praes-wartung" /usr/local/bin/praes-wartung
 install -d /opt/praesentationen
 install -m 755 "$REPO/server/upload_server.py" /opt/praesentationen/upload_server.py
 if [ ! -s "$WEB/p/list.json" ]; then
@@ -60,8 +63,19 @@ if [ ! -s "$WEB/p/list.json" ]; then
 fi
 
 # 4. Upload-Dienst
-# Ohne Passwort: jeder mit dem Link darf hochladen und löschen
-printf '# PRAES_PASSWORD=... hier eintragen, um Upload/Löschen wieder zu schützen\n' > /etc/praesentationen.env
+# Ohne Passwort: jeder mit dem Link darf hochladen und löschen. Ein selbst eingetragenes Passwort und der
+# geheime Admin-Schlüssel (für den Sicherheitsmodus) bleiben bei erneuter Installation erhalten.
+OLD_PW=$(grep -s '^PRAES_PASSWORD=' /etc/praesentationen.env | cut -d= -f2- || true)
+ADMIN_KEY=$(grep -s '^PRAES_ADMIN_KEY=' /etc/praesentationen.env | cut -d= -f2- || true)
+[ -n "$ADMIN_KEY" ] || ADMIN_KEY=$(python3 -c 'import secrets; print(secrets.token_urlsafe(24))')
+umask 077
+{
+  echo "# PRAES_PASSWORD=... eintragen, um Upload/Löschen zu schützen"
+  [ -n "$OLD_PW" ] && echo "PRAES_PASSWORD=$OLD_PW"
+  echo "PRAES_ADMIN_KEY=$ADMIN_KEY"
+  echo "PRAES_DOMAIN=$SERVER_NAME"
+} > /etc/praesentationen.env
+umask 022
 install -m 644 "$REPO/deploy/praesentationen.service" /etc/systemd/system/praesentationen.service
 systemctl daemon-reload
 systemctl enable -q praesentationen
@@ -108,3 +122,4 @@ code=$(curl -s -o /dev/null -w "%{http_code}" -X POST "${RES[@]}" --data "keine 
 echo "Upload-Dienst (Test-Upload ohne HTML soll 400 sein): HTTP $code"
 echo
 echo "Fertig: $SCHEME://$SERVER_NAME/"
+echo "Sicherheitsmodus: sudo praes-wartung an | aus   (Admin-Link fürs Handy: sudo praes-wartung link)"

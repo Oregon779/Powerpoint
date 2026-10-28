@@ -8,12 +8,15 @@ die Liste (list.json).
 Endpunkte (alle unter /api/):
   POST   /api/upload?title=<Titel>   Body = HTML-Datei
   DELETE /api/delete?id=<id>
+  GET    /api/admin/status            Header X-Admin-Key  -> {"wartung": true/false}
+  POST   /api/admin/wartung?an=1|0    Header X-Admin-Key  -> Sicherheitsmodus an/aus
 
 Konfiguration über Umgebungsvariablen:
   PRAES_DIR       Ordner mit den Präsentationen (Standard /var/www/praesentationen/p)
   PRAES_PASSWORD  optional: wenn gesetzt, verlangen Upload und Löschen dieses Passwort (Header X-Password)
   PRAES_PORT      Port (Standard 8090)
   PRAES_MAX_MB    maximale Dateigröße in MB (Standard 60)
+  PRAES_ADMIN_KEY geheimer Schlüssel für den Admin-Link (ohne ihn ist /api/admin/ gesperrt)
 """
 import hmac
 import json
@@ -30,7 +33,10 @@ DIR = os.environ.get("PRAES_DIR", "/var/www/praesentationen/p")
 PASSWORD = os.environ.get("PRAES_PASSWORD", "")
 PORT = int(os.environ.get("PRAES_PORT", "8090"))
 MAX_BYTES = int(os.environ.get("PRAES_MAX_MB", "60")) * 1024 * 1024
+ADMIN_KEY = os.environ.get("PRAES_ADMIN_KEY", "")
 LIST = os.path.join(DIR, "list.json")
+# nginx zeigt allen die Hinweisseite, solange diese Datei existiert
+FLAG = os.path.join(DIR, ".wartung")
 ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,79}$")
 
 
@@ -89,8 +95,38 @@ class Handler(BaseHTTPRequestHandler):
             return True
         return hmac.compare_digest(given.encode(), PASSWORD.encode())
 
+    def admin_ok(self):
+        given = self.headers.get("X-Admin-Key", "")
+        if len(ADMIN_KEY) >= 16 and hmac.compare_digest(given.encode(), ADMIN_KEY.encode()):
+            return True
+        time.sleep(1)
+        return False
+
+    def do_GET(self):
+        if self.url().path != "/api/admin/status":
+            return self.reply(404, {"error": "Nicht gefunden"})
+        if not self.admin_ok():
+            return self.reply(403, {"error": "Falscher Admin-Link"})
+        return self.reply(200, {"wartung": os.path.exists(FLAG)})
+
+    def admin_toggle(self, url):
+        if not self.admin_ok():
+            return self.reply(403, {"error": "Falscher Admin-Link"})
+        if parse_qs(url.query).get("an", ["0"])[0] == "1":
+            with open(FLAG, "w") as f:
+                f.write(time.strftime("%Y-%m-%d %H:%M") + " über Admin-Link\n")
+            os.chmod(FLAG, 0o644)
+        else:
+            try:
+                os.remove(FLAG)
+            except FileNotFoundError:
+                pass
+        return self.reply(200, {"wartung": os.path.exists(FLAG)})
+
     def do_POST(self):
         url = self.url()
+        if url.path == "/api/admin/wartung":
+            return self.admin_toggle(url)
         if url.path != "/api/upload":
             return self.reply(404, {"error": "Nicht gefunden"})
         if not self.authorized():

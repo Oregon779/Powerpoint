@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# Sicherheitsmodus der Präsentations-Website schalten (wird von install.sh nach /usr/local/bin kopiert).
+#   sudo praes-wartung an          Hinweisseite für alle Besucher einschalten
+#   sudo praes-wartung aus         Webseite wieder normal
+#   sudo praes-wartung status      zeigt, ob der Modus an ist
+#   sudo praes-wartung link        geheimen Admin-Link fürs Handy anzeigen
+#   sudo praes-wartung neuer-link  neuen Admin-Link erzeugen (der alte wird ungültig)
+set -euo pipefail
+
+FLAG=/var/www/praesentationen/p/.wartung
+ENV=/etc/praesentationen.env
+
+[ "$(id -u)" -eq 0 ] || { echo "Bitte mit sudo ausführen: sudo praes-wartung ${1:-status}"; exit 1; }
+
+get() { grep -s "^$1=" "$ENV" | head -n1 | cut -d= -f2- || true; }
+
+show_link() {
+  local domain key scheme=http
+  domain=$(get PRAES_DOMAIN); key=$(get PRAES_ADMIN_KEY)
+  [ -n "$domain" ] && [ -n "$key" ] || { echo "Kein Admin-Link eingerichtet. Bitte deploy/install.sh erneut ausführen."; exit 1; }
+  [ -d "/etc/letsencrypt/live/$domain" ] && scheme=https
+  echo "$scheme://$domain/admin.html#k=$key"
+}
+
+case "${1:-status}" in
+  an|ein|on)
+    printf '%s über Befehl\n' "$(date '+%Y-%m-%d %H:%M')" > "$FLAG"
+    chown www-data:www-data "$FLAG"; chmod 644 "$FLAG"
+    echo "Sicherheitsmodus ist AN. Besucher sehen jetzt die Hinweisseite."
+    ;;
+  aus|off)
+    rm -f "$FLAG"
+    echo "Sicherheitsmodus ist AUS. Die Webseite ist wieder normal erreichbar."
+    ;;
+  status)
+    if [ -f "$FLAG" ]; then echo "Sicherheitsmodus: AN (seit $(cat "$FLAG"))"; else echo "Sicherheitsmodus: AUS"; fi
+    ;;
+  link)
+    echo "Admin-Link (geheim halten, wer ihn kennt, kann den Modus schalten):"
+    show_link
+    ;;
+  neuer-link)
+    key=$(python3 -c 'import secrets; print(secrets.token_urlsafe(24))')
+    if grep -q '^PRAES_ADMIN_KEY=' "$ENV"; then
+      sed -i "s|^PRAES_ADMIN_KEY=.*|PRAES_ADMIN_KEY=$key|" "$ENV"
+    else
+      echo "PRAES_ADMIN_KEY=$key" >> "$ENV"
+    fi
+    systemctl restart praesentationen
+    echo "Neuer Admin-Link (der alte funktioniert ab sofort nicht mehr):"
+    show_link
+    ;;
+  *)
+    echo "Benutzung: sudo praes-wartung an | aus | status | link | neuer-link"
+    exit 1
+    ;;
+esac

@@ -9,6 +9,9 @@ web/index.html               Startseite: Liste, Upload, Löschen, AirPlay-Anleit
 web/play.html                Player: zeigt jede hochgeladene Präsentation als 16:9-Bühne, exakt mittig;
                              übernimmt Tippen/Wischen selbst (ein Tipp = eine Folie), keine Leiste;
                              2× Ecke oben links = Schließen
+web/wartung.html             Hinweisseite im Sicherheitsmodus
+web/admin.html               geheime Admin-Seite mit An/Aus-Schalter für den Sicherheitsmodus
+deploy/praes-wartung         Befehl zum Schalten des Sicherheitsmodus (landet in /usr/local/bin)
 web/deck-tools.js            blendet eingebaute Bedienleisten hochgeladener Dateien aus, findet die Folie
 server/upload_server.py      Upload-Dienst (nur Python-Standardbibliothek), läuft hinter nginx
 deploy/install.sh            Einrichtung auf dem VPS
@@ -40,6 +43,24 @@ ein Zertifikat abläuft (certbot erneuert es aber ohnehin automatisch). Das Skri
 Es gibt kein Passwort: Jeder mit dem Link kann ansehen, hochladen und löschen.
 Passwort wieder einschalten: in `/etc/praesentationen.env` die Zeile `PRAES_PASSWORD=...` eintragen,
 dann `sudo systemctl restart praesentationen` (die Startseite fragt dann aber noch nicht danach).
+
+## Sicherheitsmodus
+
+Im Sicherheitsmodus sehen alle Besucher nur einen Hinweis („Die Webseite wurde wegen technischen
+Schwierigkeiten in einen Sicherheitsmodus gestellt. Bitte kontaktieren Sie einen Admin dieser
+Webseite.“). Präsentationen, Upload und Löschen sind gesperrt (HTTP 503).
+
+```bash
+sudo praes-wartung an          # einschalten
+sudo praes-wartung aus         # ausschalten
+sudo praes-wartung status      # Zustand anzeigen
+sudo praes-wartung link        # geheimen Admin-Link fürs Handy anzeigen
+sudo praes-wartung neuer-link  # neuen Link erzeugen, der alte wird ungültig
+```
+
+Der Admin-Link (`/admin.html#k=…`) öffnet eine Seite mit An/Aus-Schalter. Wer ihn kennt, kann den
+Modus schalten, also geheim halten. Der Schlüssel steht in `/etc/praesentationen.env` und bleibt bei
+erneuter Installation erhalten.
 
 ## Hinweis
 

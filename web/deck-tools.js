@@ -11,7 +11,8 @@ window.DeckTools = (function () {
       if (!doc.getElementById(STYLE_ID)) {
         const st = doc.createElement('style');
         st.id = STYLE_ID;
-        st.textContent = '[data-deck-chrome]{display:none!important}html,body{cursor:default}';
+        // zusätzlich die üblichen Namen solcher Leisten, falls die Erkennung unten sie nicht erwischt
+        st.textContent = '[data-deck-chrome],#ui,#controls,#toolbar,.deck-controls,.slide-controls,.nav-controls{display:none!important}html,body{cursor:default}';
         (doc.head || doc.documentElement).appendChild(st);
       }
       const win = doc.defaultView, vw = win.innerWidth, vh = win.innerHeight;

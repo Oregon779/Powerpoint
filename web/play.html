@@ -13,7 +13,7 @@
 <style>
 /* Spielt jede hochgeladene Präsentation in einer festen 16:9-Bühne ab (wie ein Beamer mit 1920x1080),
    genau mittig und passend skaliert. Der Player übernimmt die Bedienung selbst:
-   rechts tippen = weiter, links = zurück, Rand oben/unten = Leiste mit Schließen. */
+   rechts tippen = weiter, links = zurück, Ecke oben links = Schließen. Sonst gibt es keine Leiste. */
 :root { --bg: #05080F; --ink: #F5F7FB; --gold: #C8955A; --gold-hi: #F0C48A;
   --f: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; color-scheme: dark; }
 [hidden] { display: none !important; }
@@ -31,10 +31,7 @@ html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; -
 .pill button:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 1px; }
 .pill svg { width: 20px; height: 20px; fill: currentColor; flex: none; }
 #top { left: max(16px, env(safe-area-inset-left, 0px)); top: calc(14px + env(safe-area-inset-top, 0px)); }
-#nav { left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); }
-#nav .sep { width: 1px; height: 22px; background: rgba(220,228,240,.18); }
 .hide#top { opacity: 0; transform: translateY(-14px); pointer-events: none; }
-.hide#nav { opacity: 0; transform: translate(-50%, 14px); pointer-events: none; }
 #loading { position: fixed; inset: 0; display: grid; place-items: center; z-index: 4; background: var(--bg); transition: opacity .5s; }
 #loading i { width: 44px; height: 44px; border-radius: 50%; border: 3px solid rgba(255,255,255,.12); border-top-color: var(--gold-hi); animation: spin .9s linear infinite; }
 #loading.done { opacity: 0; pointer-events: none; }
@@ -51,18 +48,13 @@ html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; -
 <div class="pill hide" id="top">
   <button id="close" aria-label="Präsentation schließen"><svg viewBox="0 0 24 24"><path d="M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12z"/></svg>Schließen</button>
 </div>
-<div class="pill hide" id="nav">
-  <button id="prev" aria-label="Vorherige Folie"><svg viewBox="0 0 24 24"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>Zurück</button>
-  <span class="sep"></span>
-  <button id="next" aria-label="Nächste Folie">Weiter<svg viewBox="0 0 24 24"><path d="M8.6 18.6 10 20l8-8-8-8-1.4 1.4 6.6 6.6z"/></svg></button>
-</div>
 <div id="err" hidden><div>Präsentation nicht gefunden.<br><br><a href="/">Zur Übersicht</a></div></div>
 
 <script src="/deck-tools.js"></script>
 <script>
 (function () {
   const $ = (id) => document.getElementById(id);
-  const frame = $('frame'), clip = $('clip'), top = $('top'), navBar = $('nav');
+  const frame = $('frame'), clip = $('clip'), top = $('top');
   const id = new URLSearchParams(location.search).get('id') || '';
   if (!/^[a-z0-9][a-z0-9-]{0,79}$/.test(id)) { $('err').hidden = false; $('loading').hidden = true; return; }
 
@@ -83,15 +75,26 @@ html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; -
   if (window.visualViewport) visualViewport.addEventListener('resize', fit);
   fit();
 
-  // ---------- Leiste (nur per Tipp auf den Rand) ----------
+  // ---------- Rauskommen: Tipp in die Ecke oben links ----------
+  // Erster Tipp in die Ecke zeigt „Schließen“, zweiter Tipp dort verlässt die Präsentation.
+  // So schließt ein versehentlicher Tipp beim Zurückblättern nicht gleich alles.
   let hideT;
-  function showBars() { top.classList.remove('hide'); navBar.classList.remove('hide'); clearTimeout(hideT); hideT = setTimeout(hideBars, 4000); }
-  function hideBars() { top.classList.add('hide'); navBar.classList.add('hide'); clearTimeout(hideT); }
-  function toggleBars() { top.classList.contains('hide') ? showBars() : hideBars(); }
-  $('close').addEventListener('click', () => { location.href = '/'; });
-  $('prev').addEventListener('click', () => { go(-1); showBars(); });
-  $('next').addEventListener('click', () => { go(1); showBars(); });
-  $('wrap').addEventListener('click', toggleBars); // dunkler Rand um die Folie
+  function showClose() { top.classList.remove('hide'); clearTimeout(hideT); hideT = setTimeout(hideClose, 3500); }
+  function hideClose() { top.classList.add('hide'); clearTimeout(hideT); }
+  const leave = () => { location.href = '/'; };
+  $('close').addEventListener('click', leave);
+  function inCorner(x, y) {
+    const size = Math.max(100, innerWidth * 0.1);
+    return x < size && y < size;
+  }
+  // Bildschirm-Tipp (x, y in Bildschirmpunkten) auswerten: Ecke, sonst links/rechts blättern
+  function tap(x, y) {
+    if (inCorner(x, y)) { top.classList.contains('hide') ? showClose() : leave(); return; }
+    hideClose();
+    wakeLock();
+    go(x < innerWidth / 2 ? -1 : 1);
+  }
+  $('wrap').addEventListener('click', (e) => tap(e.clientX, e.clientY)); // dunkler Rand um die Folie
 
   // ---------- Blättern ----------
   // Der Präsentation wird ein Pfeiltasten-Druck geschickt (versteht praktisch jede HTML-Präsentation).
@@ -115,6 +118,7 @@ html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; -
     key(doc, dir > 0 ? 'ArrowRight' : 'ArrowLeft', dir > 0 ? 39 : 37);
     setTimeout(() => {
       mo.disconnect();
+      DeckTools.hideChrome(doc);
       if (changed || win.scrollX !== sx || win.scrollY !== sy) return;
       // Ersatz: Klick in die linke/rechte Hälfte der Folie weiterreichen
       const x = crop.x + crop.w * (dir > 0 ? 0.8 : 0.2), y = crop.y + crop.h / 2;
@@ -151,11 +155,9 @@ html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; -
       if (pass(e)) return;
       e.stopImmediatePropagation(); e.preventDefault();
       if (swiped) { swiped = false; return; }
-      wakeLock();
-      const fx = (e.clientX - crop.x) / crop.w, fy = (e.clientY - crop.y) / crop.h;
-      if (fy < 0.12 || fy > 0.88) { toggleBars(); return; }
-      hideBars();
-      go(fx < 0.5 ? -1 : 1);
+      // Punkt in der Präsentation in Bildschirmpunkte umrechnen
+      const r = clip.getBoundingClientRect();
+      tap(r.left + (e.clientX - crop.x) * k, r.top + (e.clientY - crop.y) * k);
     }, true);
     // Links in der Präsentation verlassen den Player als Ganzes
     win.addEventListener('click', (e) => {

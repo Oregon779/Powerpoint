@@ -16,7 +16,7 @@ Technische Vorgaben, bitte genau einhalten:
   Höhe/900), bei `resize` neu berechnen. **Keinen** Platz unter oder über der Bühne für Leisten lassen.
 - Steuerung: **Pfeil rechts / Leertaste = weiter, Pfeil links = zurück** (per `keydown` auf `document`).
   Die Website spielt die Datei in einem eigenen Player ab, der Tippen, Wischen, die Bedienleiste und
-  „Schließen“ selbst übernimmt und dafür Pfeiltasten schickt. Die Datei braucht daher **keine eigene
+  das Schließen (Ecke oben links) selbst übernimmt und dafür Pfeiltasten schickt. Die Datei braucht daher **keine eigene
   Bedienleiste** und darf bei Berührung oder Mausbewegung nichts einblenden.
 - Folienwechsel mit weicher Überblendung, Elemente erscheinen gestaffelt mit
   Animationen (einfliegen, einblenden, Balken wachsen). `prefers-reduced-motion` beachten.

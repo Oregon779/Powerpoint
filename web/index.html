@@ -448,6 +448,18 @@ $("up").addEventListener("submit", async (e) => {
 });
 
 load();
+
+// Sicherheitsmodus live: alle 2 Sekunden nachfragen; wird er eingeschaltet, sofort neu laden (zeigt dann die Hinweisseite)
+(function () {
+  async function check() {
+    try {
+      const r = await fetch('/wartung-status', { cache: 'no-store' });
+      if (r.ok && (await r.json()).wartung) location.reload();
+    } catch (e) {}
+  }
+  setInterval(() => { if (document.visibilityState === 'visible') check(); }, 2000);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') check(); });
+})();
 </script>
 </body>
 </html>

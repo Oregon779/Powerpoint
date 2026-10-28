@@ -109,6 +109,8 @@ code { font-family: ui-monospace, Menlo, monospace; font-size: 13px; color: var(
     try { render((await call('POST', '/api/admin/wartung?an=' + (on ? 1 : 0))).wartung); } catch (e) { fail(e.message); }
   });
   load();
+  // live mitbekommen, wenn der Modus woanders (z. B. per Befehl) geschaltet wird
+  setInterval(() => { if (document.visibilityState === 'visible' && !$('sw').disabled) load(); }, 3000);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') load(); });
 })();
 </script>

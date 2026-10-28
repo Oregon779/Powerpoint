@@ -57,18 +57,24 @@ footer { padding: 22px 16px calc(22px + env(safe-area-inset-bottom, 0px)); text-
     <span class="tag">Sicherheitsmodus</span>
     <h1>Die Webseite ist vorübergehend gesperrt</h1>
     <p>Die Webseite wurde wegen <strong>technischen Schwierigkeiten</strong> in einen Sicherheitsmodus gestellt. Bitte kontaktieren Sie einen <strong>Admin dieser Webseite</strong>.</p>
-    <div class="wait"><i></i>Die Seite lädt automatisch neu, sobald sie wieder verfügbar ist.</div>
+    <div class="wait"><i></i>Die Seite öffnet sich automatisch wieder, sobald sie verfügbar ist.</div>
   </div>
 </main>
 <footer><span class="powered">Powered by <b>Stone Plugins</b></span></footer>
 <script>
-// Alle 15 Sekunden nachsehen, ob der Sicherheitsmodus vorbei ist, dann zur Startseite
-setInterval(async () => {
-  try {
-    const r = await fetch('/p/list.json', { cache: 'no-store' });
-    if (r.ok) location.href = '/';
-  } catch (e) {}
-}, 15000);
+// Live: alle 2 Sekunden nachfragen; ist der Sicherheitsmodus aus, dieselbe Adresse neu laden.
+// (Nur wenn diese Seite als Ersatz für eine gesperrte Adresse kam; direkt aufgerufen bleibt sie stehen.)
+(function () {
+  if (location.pathname === '/wartung.html') return;
+  async function check() {
+    try {
+      const r = await fetch('/wartung-status', { cache: 'no-store' });
+      if (r.ok && !(await r.json()).wartung) location.reload();
+    } catch (e) {}
+  }
+  setInterval(() => { if (document.visibilityState === 'visible') check(); }, 2000);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') check(); });
+})();
 </script>
 </body>
 </html>

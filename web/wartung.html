@@ -5,68 +5,231 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#05080F">
+<meta name="theme-color" content="#07040A">
 <meta name="robots" content="noindex">
 <title>Sicherheitsmodus</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
-/* Wird von nginx bei aktivem Sicherheitsmodus für jede Adresse ausgeliefert (HTTP 503). Muss eigenständig sein. */
-:root { --bg: #05080F; --panel: rgba(18,26,44,.62); --line: rgba(220,228,240,.10); --line-2: rgba(220,228,240,.22);
-  --ink: #F5F7FB; --muted: #97A4B9; --gold: #C8955A; --gold-hi: #F0C48A; --danger: #FF6B6B;
-  --f: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; color-scheme: dark; }
+/* Wird von nginx bei aktivem Sicherheitsmodus für jede Adresse ausgeliefert (HTTP 503).
+   Muss vollständig eigenständig sein: kein Bild, kein Skript von außerhalb. */
+:root {
+  --bg: #07040A; --ink: #F7F3F2; --muted: #B3A4A8; --line: rgba(255,220,220,.12); --line-2: rgba(255,220,220,.24);
+  --red: #FF3B4E; --red-hi: #FF7A86; --amber: #FFB547; --gold: #C8955A; --gold-hi: #F3C78C;
+  --f: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --ease: cubic-bezier(.2,.75,.2,1);
+  color-scheme: dark;
+}
 * { box-sizing: border-box; }
-html, body { margin: 0; min-height: 100%; background: var(--bg); }
-body { min-height: 100vh; min-height: 100dvh; display: grid; grid-template-rows: 1fr auto; color: var(--ink); font-family: var(--f); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-.aurora { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
-.aurora i { position: absolute; width: 60vmax; height: 60vmax; border-radius: 50%; filter: blur(90px); opacity: .35; }
-.aurora i:nth-child(1) { background: var(--danger); left: -20vmax; top: -25vmax; opacity: .22; animation: drift 24s ease-in-out infinite alternate; }
-.aurora i:nth-child(2) { background: var(--gold); right: -20vmax; bottom: -30vmax; animation: drift 28s ease-in-out infinite alternate-reverse; }
-@keyframes drift { to { transform: translate(10vmax, 8vmax) scale(1.1); } }
-main { display: grid; place-items: center; padding: calc(32px + env(safe-area-inset-top, 0px)) 16px 32px; }
-.card { width: 100%; max-width: 560px; text-align: center; padding: clamp(28px, 6vw, 48px) clamp(20px, 5vw, 44px); border-radius: 28px;
-  background: var(--panel); border: 1px solid var(--line); box-shadow: 0 40px 100px -40px rgba(0,0,0,.8);
-  backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%); animation: rise .8s cubic-bezier(.2,.75,.2,1) both; }
-@keyframes rise { from { opacity: 0; transform: translateY(20px) scale(.98); } }
-.shield { position: relative; width: 92px; height: 92px; margin: 0 auto 26px; display: grid; place-items: center; border-radius: 28px;
-  background: linear-gradient(140deg, rgba(240,196,138,.22), rgba(200,149,90,.06)); border: 1px solid rgba(240,196,138,.35); }
-.shield::before { content: ""; position: absolute; inset: -1px; border-radius: 28px; box-shadow: 0 0 0 0 rgba(240,196,138,.45); animation: pulse 2.4s ease-out infinite; }
-@keyframes pulse { 70% { box-shadow: 0 0 0 22px rgba(240,196,138,0); } 100% { box-shadow: 0 0 0 0 rgba(240,196,138,0); } }
-.shield svg { width: 46px; height: 46px; fill: var(--gold-hi); }
-.tag { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: .24em; text-transform: uppercase; color: var(--gold-hi);
-  padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(240,196,138,.3); background: rgba(240,196,138,.06); }
-.tag::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--danger); box-shadow: 0 0 10px var(--danger); }
-h1 { margin: 18px 0 0; font-size: clamp(28px, 6vw, 40px); font-weight: 800; letter-spacing: -.8px; line-height: 1.1; }
-p { margin: 16px auto 0; max-width: 440px; color: var(--muted); font-size: clamp(16px, 2.4vw, 18px); line-height: 1.6; }
-p strong { color: var(--ink); font-weight: 700; }
-.wait { margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--line); display: inline-flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); }
-.wait i { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,.15); border-top-color: var(--gold-hi); animation: spin 1s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-footer { padding: 22px 16px calc(22px + env(safe-area-inset-bottom, 0px)); text-align: center; }
-.powered { display: inline-flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); padding: 10px 18px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255,255,255,.03); }
-.powered b { font-weight: 800; color: var(--gold-hi); }
-@media (prefers-reduced-motion: reduce) { *, *::before { animation: none !important; } }
+html, body { margin: 0; background: var(--bg); }
+html { overflow-x: hidden; overflow-x: clip; }
+body { min-height: 100vh; min-height: 100dvh; color: var(--ink); font-family: var(--f); -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  display: grid; grid-template-rows: auto 1fr auto auto; }
+
+/* ---------- Atmosphäre ---------- */
+.glow { position: fixed; inset: 0; z-index: -4; pointer-events: none;
+  background: radial-gradient(900px 600px at 50% 45%, rgba(255,59,78,.20), transparent 60%),
+              radial-gradient(700px 500px at 0% 100%, rgba(255,181,71,.12), transparent 60%),
+              radial-gradient(700px 500px at 100% 0%, rgba(124,40,255,.12), transparent 60%); }
+/* pulsierender Alarm-Rand */
+.alarm { position: fixed; inset: 0; z-index: 20; pointer-events: none; box-shadow: inset 0 0 120px 10px rgba(255,59,78,.35); animation: alarm 2.4s ease-in-out infinite; }
+@keyframes alarm { 50% { box-shadow: inset 0 0 60px 0 rgba(255,59,78,.08); } }
+.hex { position: fixed; inset: 0; z-index: -3; pointer-events: none; opacity: .35;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='98' viewBox='0 0 56 98'%3E%3Cpath d='M28 66L0 50V16L28 0l28 16v34L28 66zm0 32L0 82V50l28 16 28-16v32L28 98z' fill='none' stroke='%23FF3B4E' stroke-opacity='.22' stroke-width='1'/%3E%3C/svg%3E");
+  mask-image: radial-gradient(ellipse at 50% 45%, #000 10%, transparent 65%); -webkit-mask-image: radial-gradient(ellipse at 50% 45%, #000 10%, transparent 65%); }
+.scan { position: fixed; left: 0; right: 0; top: -20%; height: 20%; z-index: -1; pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgba(255,59,78,.10) 70%, rgba(255,122,134,.35) 98%, transparent); animation: scan 5s linear infinite; }
+@keyframes scan { to { transform: translateY(600%); } }
+.lines { position: fixed; inset: 0; z-index: 21; pointer-events: none; opacity: .08; background: repeating-linear-gradient(0deg, #000 0 1px, transparent 1px 3px); }
+.grain { position: fixed; inset: -50%; z-index: 21; pointer-events: none; opacity: .06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+/* ---------- Radar hinter dem Schloss ---------- */
+.radar { position: fixed; left: 50%; top: 44%; width: min(120vmin, 1000px); aspect-ratio: 1; translate: -50% -50%; z-index: -2; pointer-events: none; border-radius: 50%;
+  background: repeating-radial-gradient(circle, transparent 0 calc(12.5% - 1px), rgba(255,59,78,.16) calc(12.5% - 1px) 12.5%);
+  mask-image: radial-gradient(circle, #000 35%, transparent 70%); -webkit-mask-image: radial-gradient(circle, #000 35%, transparent 70%); }
+.radar::before { content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background: linear-gradient(90deg, transparent calc(50% - .5px), rgba(255,59,78,.2) calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px)),
+              linear-gradient(0deg, transparent calc(50% - .5px), rgba(255,59,78,.2) calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px)); }
+.radar::after { content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(255,59,78,.55), rgba(255,59,78,.12) 12%, transparent 30%); animation: sweep 4s linear infinite; }
+@keyframes sweep { to { transform: rotate(360deg); } }
+.blip { position: absolute; width: 10px; height: 10px; margin: -5px; border-radius: 50%; background: var(--red-hi); box-shadow: 0 0 14px var(--red); animation: blip 2.6s ease-out forwards; }
+@keyframes blip { 0% { opacity: 0; transform: scale(.3); } 10% { opacity: 1; transform: scale(1.3); } 100% { opacity: 0; transform: scale(.8); } }
+
+/* ---------- Absperrband oben und unten ---------- */
+.tape { position: relative; z-index: 10; height: 46px; overflow: hidden; display: flex; align-items: center;
+  background: repeating-linear-gradient(-45deg, var(--amber) 0 22px, #120D05 22px 44px); background-size: 62.2px 62.2px; animation: stripes 1.6s linear infinite;
+  box-shadow: 0 10px 40px rgba(0,0,0,.6), 0 0 40px rgba(255,181,71,.25); }
+.tape.top { transform: rotate(-1.6deg) scale(1.04); margin-top: calc(env(safe-area-inset-top, 0px) + 10px); }
+.tape.bottom { transform: rotate(1.4deg) scale(1.04); margin-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px); }
+@keyframes stripes { to { background-position: 62.2px 0; } }
+.tape .track { display: flex; width: max-content; animation: run 22s linear infinite; }
+.tape.bottom .track { animation-direction: reverse; }
+.tape span { flex: none; padding: 5px 22px; margin-right: 0; white-space: nowrap; font: 800 15px var(--f); letter-spacing: .22em; color: #120D05; background: var(--amber); }
+@keyframes run { to { transform: translateX(-50%); } }
+
+/* ---------- Inhalt ---------- */
+main { position: relative; display: grid; place-items: center; padding: 28px 16px; }
+.wrap { width: 100%; max-width: 920px; text-align: center; container-type: inline-size; }
+
+/* Schloss mit rotierenden Ringen */
+.emblem { position: relative; width: 200px; height: 200px; margin: 0 auto 28px; display: grid; place-items: center; animation: pop 1s var(--ease) both; }
+@keyframes pop { from { opacity: 0; transform: scale(.6); } }
+.ring { position: absolute; inset: 0; border-radius: 50%; }
+.ring.r1 { border: 2px dashed rgba(255,122,134,.55); animation: rot 18s linear infinite; }
+.ring.r2 { inset: 16px; background: repeating-conic-gradient(rgba(255,181,71,.8) 0 2deg, transparent 2deg 10deg);
+  mask: radial-gradient(circle, transparent 62%, #000 63% 68%, transparent 69%); -webkit-mask: radial-gradient(circle, transparent 62%, #000 63% 68%, transparent 69%); animation: rot 12s linear infinite reverse; }
+.ring.r3 { inset: 34px; border: 1px solid rgba(255,59,78,.5); animation: rot 6s linear infinite; }
+.ring.r3::after { content: ""; position: absolute; left: 50%; top: -5px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: var(--red-hi); box-shadow: 0 0 16px var(--red), 0 0 4px #fff; }
+@keyframes rot { to { transform: rotate(360deg); } }
+.core { position: relative; width: 96px; height: 96px; border-radius: 30px; display: grid; place-items: center;
+  background: radial-gradient(circle at 30% 25%, rgba(255,122,134,.45), rgba(255,59,78,.12) 60%), #1A0A10; border: 1px solid rgba(255,122,134,.5);
+  box-shadow: 0 0 0 8px rgba(255,59,78,.08), 0 0 60px rgba(255,59,78,.55), inset 0 0 20px rgba(255,59,78,.35); animation: breathe 2.4s ease-in-out infinite; }
+@keyframes breathe { 50% { box-shadow: 0 0 0 14px rgba(255,59,78,.04), 0 0 90px rgba(255,59,78,.8), inset 0 0 30px rgba(255,59,78,.5); } }
+.core svg { width: 50px; height: 50px; filter: drop-shadow(0 0 10px rgba(255,59,78,.9)); }
+.shackle { transform-box: fill-box; transform-origin: 50% 100%; animation: shake 4s ease-in-out infinite; }
+@keyframes shake { 0%, 86%, 100% { transform: none; } 88% { transform: translateY(-1.5px) rotate(-4deg); } 92% { transform: translateY(-1.5px) rotate(4deg); } 96% { transform: rotate(-2deg); } }
+
+.state { display: inline-flex; align-items: center; gap: 10px; font: 700 12px var(--mono); letter-spacing: .25em; text-transform: uppercase; color: var(--red-hi);
+  padding: 8px 16px; border-radius: 999px; border: 1px solid rgba(255,59,78,.45); background: rgba(255,59,78,.1); animation: fade .8s var(--ease) .2s both; }
+.state::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--red); box-shadow: 0 0 12px var(--red); animation: blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: .15; } }
+@keyframes fade { from { opacity: 0; transform: translateY(12px); } }
+
+/* Glitch-Titel */
+.glitch { position: relative; display: inline-block; margin: 22px 0 0; font-size: clamp(36px, 8vw, 84px); font-size: clamp(28px, 9.3cqi, 96px); font-weight: 800; letter-spacing: -.03em; line-height: 1; white-space: nowrap;
+  background: linear-gradient(180deg, #fff 30%, #FFC9CE); -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: 0 0 40px rgba(255,59,78,.35); animation: fade .8s var(--ease) .3s both; }
+.glitch::before, .glitch::after { content: attr(data-text); position: absolute; inset: 0; -webkit-background-clip: initial; background: none; text-shadow: none; }
+.glitch::before { color: var(--red); animation: g1 3.2s infinite steps(1); clip-path: inset(0 0 100% 0); }
+.glitch::after { color: #36E6FF; animation: g2 3.2s infinite steps(1); clip-path: inset(0 0 100% 0); }
+@keyframes g1 { 0%, 82%, 100% { clip-path: inset(0 0 100% 0); transform: none; } 84% { clip-path: inset(10% 0 60% 0); transform: translate(-6px, -2px); } 87% { clip-path: inset(55% 0 20% 0); transform: translate(5px, 1px); } 90% { clip-path: inset(30% 0 45% 0); transform: translate(-3px, 0); } 93% { clip-path: inset(75% 0 5% 0); transform: translate(4px, 2px); } }
+@keyframes g2 { 0%, 82%, 100% { clip-path: inset(0 0 100% 0); transform: none; } 85% { clip-path: inset(65% 0 10% 0); transform: translate(6px, 2px); } 88% { clip-path: inset(15% 0 70% 0); transform: translate(-5px, -1px); } 91% { clip-path: inset(40% 0 35% 0); transform: translate(3px, 0); } 94% { clip-path: inset(5% 0 80% 0); transform: translate(-4px, -2px); } }
+h2 { margin: 16px 0 0; font-size: clamp(20px, 3.4vw, 28px); font-weight: 800; letter-spacing: -.4px; animation: fade .8s var(--ease) .4s both; }
+.msg { margin: 16px auto 0; max-width: 560px; color: var(--muted); font-size: clamp(16px, 2.4vw, 19px); line-height: 1.65; animation: fade .8s var(--ease) .5s both; }
+.msg strong { color: var(--ink); }
+
+/* Status-Panel */
+.panel { margin: 30px auto 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; border-radius: 20px; overflow: hidden; border: 1px solid var(--line-2);
+  background: var(--line); box-shadow: 0 30px 80px -30px rgba(0,0,0,.8), 0 0 60px -30px rgba(255,59,78,.5); animation: fade .8s var(--ease) .6s both; }
+@media (max-width: 520px) { .panel { grid-template-columns: 1fr; } }
+.cell { padding: 16px 18px; text-align: left; background: rgba(18,8,12,.82); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); display: flex; align-items: center; gap: 14px; }
+.cell small { display: block; font: 600 11px var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+.cell b { display: block; margin-top: 4px; font: 700 18px var(--mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+.cell b.red { color: var(--red-hi); }
+.dot { flex: none; width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: rgba(255,59,78,.14); border: 1px solid rgba(255,59,78,.4); }
+.dot i { width: 10px; height: 10px; border-radius: 50%; background: var(--red); box-shadow: 0 0 12px var(--red); animation: blink 1s steps(2) infinite; }
+.dot svg { width: 18px; height: 18px; fill: var(--amber); }
+/* Fortschrittsring bis zur nächsten automatischen Prüfung */
+.ringp { flex: none; width: 34px; height: 34px; transform: rotate(-90deg); }
+.ringp circle { fill: none; stroke-width: 3; }
+.ringp .bgc { stroke: rgba(255,255,255,.1); }
+.ringp .fg { stroke: var(--amber); stroke-dasharray: 88; stroke-dashoffset: 88; stroke-linecap: round; filter: drop-shadow(0 0 4px var(--amber)); }
+.ringp.go .fg { animation: fill 2s linear forwards; }
+@keyframes fill { to { stroke-dashoffset: 0; } }
+
+/* Terminal-Zeile */
+.term { margin: 22px auto 0; display: inline-flex; align-items: center; gap: 10px; max-width: 100%; padding: 10px 16px; border-radius: 12px; font: 500 14px var(--mono); color: #FFB3BA;
+  background: rgba(0,0,0,.45); border: 1px solid var(--line); animation: fade .8s var(--ease) .7s both; }
+.term::before { content: "›"; color: var(--amber); font-weight: 700; }
+.term #typed::after { content: "▌"; margin-left: 2px; color: var(--red-hi); animation: blink 1s steps(2) infinite; }
+
+footer { position: relative; z-index: 10; padding: 6px 16px 18px; text-align: center; }
+.powered { display: inline-flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); padding: 10px 18px; border-radius: 999px; border: 1px solid var(--line); background: rgba(18,8,12,.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.powered b { font-weight: 800; background: linear-gradient(100deg, var(--gold-hi), #fff, var(--gold-hi)); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: sheen 4s ease-in-out infinite; }
+@keyframes sheen { 0%, 100% { background-position: 100% 0; } 50% { background-position: 0 0; } }
+
+@media (max-height: 760px) { .emblem { width: 150px; height: 150px; margin-bottom: 18px; } .core { width: 76px; height: 76px; border-radius: 24px; } .core svg { width: 40px; height: 40px; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; } .glitch::before, .glitch::after { display: none; } }
 </style>
 </head>
 <body>
-<div class="aurora" aria-hidden="true"><i></i><i></i></div>
+<div class="glow" aria-hidden="true"></div>
+<div class="hex" aria-hidden="true"></div>
+<div class="radar" id="radar" aria-hidden="true"></div>
+<div class="scan" aria-hidden="true"></div>
+<div class="alarm" aria-hidden="true"></div>
+<div class="lines" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<div class="tape top" aria-hidden="true"><div class="track"><span>⚠ SICHERHEITSMODUS AKTIV ⚠ ZUGRIFF GESPERRT ⚠ SICHERHEITSMODUS AKTIV ⚠ ZUGRIFF GESPERRT</span><span>⚠ SICHERHEITSMODUS AKTIV ⚠ ZUGRIFF GESPERRT ⚠ SICHERHEITSMODUS AKTIV ⚠ ZUGRIFF GESPERRT</span></div></div>
+
 <main>
-  <div class="card" role="alert">
-    <div class="shield" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 1 3 5v6c0 5.6 3.8 10.7 9 12 5.2-1.3 9-6.4 9-12V5zm0 6a1.5 1.5 0 0 1 1.5 1.5v4a1.5 1.5 0 0 1-3 0v-4A1.5 1.5 0 0 1 12 7m0 8.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3"/></svg></div>
-    <span class="tag">Sicherheitsmodus</span>
-    <h1>Die Webseite ist vorübergehend gesperrt</h1>
-    <p>Die Webseite wurde wegen <strong>technischen Schwierigkeiten</strong> in einen Sicherheitsmodus gestellt. Bitte kontaktieren Sie einen <strong>Admin dieser Webseite</strong>.</p>
-    <div class="wait"><i></i>Die Seite öffnet sich automatisch wieder, sobald sie verfügbar ist.</div>
+  <div class="wrap" role="alert">
+    <div class="emblem" aria-hidden="true">
+      <span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span>
+      <div class="core">
+        <svg viewBox="0 0 24 24"><defs><linearGradient id="lk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE1E4"/><stop offset="1" stop-color="#FF7A86"/></linearGradient></defs>
+          <path class="shackle" d="M7 10V7a5 5 0 0 1 10 0v3h-2V7a3 3 0 0 0-6 0v3z" fill="url(#lk)"/>
+          <path d="M5 10h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1m7 3.2a1.8 1.8 0 0 0-1 3.3V19h2v-2.5a1.8 1.8 0 0 0-1-3.3" fill="url(#lk)"/></svg>
+      </div>
+    </div>
+
+    <span class="state">Zugriff gesperrt</span>
+    <div><span class="glitch" data-text="SICHERHEITSMODUS">SICHERHEITSMODUS</span></div>
+    <h2>Die Webseite ist vorübergehend gesperrt</h2>
+    <p class="msg">Die Webseite wurde wegen <strong>technischen Schwierigkeiten</strong> in einen Sicherheitsmodus gestellt. Bitte kontaktieren Sie einen <strong>Admin dieser Webseite</strong>.</p>
+
+    <div class="panel">
+      <div class="cell"><span class="dot"><i></i></span><div><small>Status</small><b class="red">GESPERRT</b></div></div>
+      <div class="cell"><span class="dot"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20m1 10.4V6h-2v7.4l5 3 1-1.7z"/></svg></span><div><small>Uhrzeit</small><b id="clock">--:--:--</b></div></div>
+      <div class="cell"><svg class="ringp" id="ringp" viewBox="0 0 34 34"><circle class="bgc" cx="17" cy="17" r="14"/><circle class="fg" cx="17" cy="17" r="14"/></svg><div><small>Freigabe-Prüfung</small><b>alle 2 s</b></div></div>
+    </div>
+
+    <div class="term"><span id="typed"></span></div>
   </div>
 </main>
+
 <footer><span class="powered">Powered by <b>Stone Plugins</b></span></footer>
+<div class="tape bottom" aria-hidden="true"><div class="track"><span>⚠ BITTE ADMIN KONTAKTIEREN ⚠ SICHERHEITSMODUS AKTIV ⚠ BITTE ADMIN KONTAKTIEREN ⚠ SICHERHEITSMODUS AKTIV</span><span>⚠ BITTE ADMIN KONTAKTIEREN ⚠ SICHERHEITSMODUS AKTIV ⚠ BITTE ADMIN KONTAKTIEREN ⚠ SICHERHEITSMODUS AKTIV</span></div></div>
+
 <script>
-// Live: alle 2 Sekunden nachfragen; ist der Sicherheitsmodus aus, dieselbe Adresse neu laden.
-// (Nur wenn diese Seite als Ersatz für eine gesperrte Adresse kam; direkt aufgerufen bleibt sie stehen.)
 (function () {
-  if (location.pathname === '/wartung.html') return;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Uhr
+  const clock = document.getElementById('clock');
+  const tick = () => { clock.textContent = new Date().toLocaleTimeString('de-DE'); };
+  tick(); setInterval(tick, 1000);
+
+  // Terminal-Zeile tippt wechselnde Meldungen
+  const lines = ['Sicherheitsmodus aktiv', 'Alle Inhalte gesichert', 'Zugriff vorübergehend gesperrt', 'Warte auf Freigabe durch einen Admin', 'Seite öffnet sich automatisch wieder'];
+  const typed = document.getElementById('typed');
+  if (reduce) typed.textContent = lines[0];
+  else (async function loop() {
+    for (let n = 0; ; n = (n + 1) % lines.length) {
+      for (let i = 1; i <= lines[n].length; i++) { typed.textContent = lines[n].slice(0, i); await new Promise((r) => setTimeout(r, 38)); }
+      await new Promise((r) => setTimeout(r, 1800));
+      for (let i = lines[n].length; i >= 0; i--) { typed.textContent = lines[n].slice(0, i); await new Promise((r) => setTimeout(r, 14)); }
+      await new Promise((r) => setTimeout(r, 250));
+    }
+  })();
+
+  // Radar-Blips an zufälligen Stellen
+  if (!reduce) {
+    const radar = document.getElementById('radar');
+    setInterval(() => {
+      const a = Math.random() * Math.PI * 2, d = 12 + Math.random() * 30;
+      const b = document.createElement('span'); b.className = 'blip';
+      b.style.left = (50 + Math.cos(a) * d) + '%'; b.style.top = (50 + Math.sin(a) * d) + '%';
+      radar.appendChild(b); setTimeout(() => b.remove(), 2700);
+    }, 900);
+  }
+
+  // Fortschrittsring läuft im Takt der Prüfung neu an
+  const ring = document.getElementById('ringp');
+  function restartRing() { ring.classList.remove('go'); void ring.getBoundingClientRect(); ring.classList.add('go'); }
+  restartRing();
+
+  // Live: alle 2 Sekunden nachfragen; ist der Sicherheitsmodus aus, dieselbe Adresse neu laden.
+  // (Nur wenn diese Seite als Ersatz für eine gesperrte Adresse kam; direkt aufgerufen bleibt sie stehen.)
+  const direct = location.pathname === '/wartung.html';
   async function check() {
+    restartRing();
+    if (direct) return;
     try {
       const r = await fetch('/wartung-status', { cache: 'no-store' });
       if (r.ok && !(await r.json()).wartung) location.reload();

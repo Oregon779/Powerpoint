@@ -11,21 +11,13 @@ Inhalte/Stichpunkte: [STICHPUNKTE ODER TEXT EINFÜGEN]
 Technische Vorgaben, bitte genau einhalten:
 - Liefere **eine einzige HTML-Datei** (beginnt mit `<!doctype html>`), alles inline:
   CSS, JavaScript und Bilder als Base64. Keine externen Dateien außer Google Fonts.
-- Feste Bühne 1600×900 px, die auf jeden Bildschirm passt (Handy quer, iPad, Fernseher
-  über AirPlay), Rand in dunkler Farbe. Wichtig, sonst wird sie auf dem iPad abgeschnitten:
-  Bühne mit `position:absolute; left:50%; top:50%` und
-  `transform: translate(-50%,-50%) scale(k)` zentrieren (k = kleinerer Wert aus
-  Breite/1600 und Höhe/900, Maße aus `visualViewport`), **nicht** per Grid/Flex-Zentrierung.
-  Bei `resize`, `orientationchange` und Vollbildwechsel neu berechnen.
-- Steuerung: rechte Bildhälfte tippen / nach links wischen / Pfeil rechts / Leertaste = weiter,
-  linke Bildhälfte tippen / nach rechts wischen / Pfeil links = zurück. Normales Tippen und
-  Tastendrücke zeigen **keine** Bedienleiste. Die Leiste (zurück, Zähler, weiter, Vollbild
-  mit `webkit`-Variante für iPad) erscheint nur beim Tippen auf den oberen/unteren Rand
-  (dunkler Rand bzw. obere/untere 10 %), ein zweiter Randtipp blendet sie aus; am Computer
-  auch bei Mausbewegung (`pointerType === 'mouse'`). Sie blendet sich nach ein paar Sekunden aus.
-  Zusammen mit der Leiste erscheint oben links ein Knopf **„Schließen“**, der zur Übersicht `/`
-  zurückführt (die Seite läuft als Web-App ohne Browser-Zurück-Knopf). Auf iPad/iPhone kein
-  Safari-Vollbild auslösen (das zeigt einen X-Knopf); stattdessen Hinweis „Teilen → Zum Home-Bildschirm“.
+- Feste Bühne 1600×900 px (16:9), die das Fenster ausfüllt: mit `position:absolute; left:50%; top:50%`
+  und `transform: translate(-50%,-50%) scale(k)` zentrieren (k = kleinerer Wert aus Breite/1600 und
+  Höhe/900), bei `resize` neu berechnen. **Keinen** Platz unter oder über der Bühne für Leisten lassen.
+- Steuerung: **Pfeil rechts / Leertaste = weiter, Pfeil links = zurück** (per `keydown` auf `document`).
+  Die Website spielt die Datei in einem eigenen Player ab, der Tippen, Wischen, die Bedienleiste und
+  „Schließen“ selbst übernimmt und dafür Pfeiltasten schickt. Die Datei braucht daher **keine eigene
+  Bedienleiste** und darf bei Berührung oder Mausbewegung nichts einblenden.
 - Folienwechsel mit weicher Überblendung, Elemente erscheinen gestaffelt mit
   Animationen (einfliegen, einblenden, Balken wachsen). `prefers-reduced-motion` beachten.
 - Aktuelle Folie in der URL merken (`#s3`), damit Neuladen auf derselben Folie bleibt.

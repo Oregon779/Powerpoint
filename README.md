@@ -6,7 +6,9 @@ du lädst sie auf der Website hoch, und alle können sie dort öffnen und vorfü
 
 ```
 web/index.html               Startseite: Liste, Upload, Löschen, AirPlay-Anleitung
-web/play.html                Player: zeigt jede hochgeladene Präsentation als 16:9-Bühne, passend skaliert
+web/play.html                Player: zeigt jede hochgeladene Präsentation als 16:9-Bühne, exakt mittig;
+                             übernimmt Tippen/Wischen selbst (ein Tipp = eine Folie) und hat eine eigene Leiste
+web/deck-tools.js            blendet eingebaute Bedienleisten hochgeladener Dateien aus, findet die Folie
 server/upload_server.py      Upload-Dienst (nur Python-Standardbibliothek), läuft hinter nginx
 deploy/install.sh            Einrichtung auf dem VPS
 deploy/nginx-praesentationen.conf, deploy/praesentationen.service

@@ -8,75 +8,206 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Präsentationen">
 <link rel="manifest" href="/manifest.webmanifest">
-<meta name="theme-color" content="#0D1524">
+<meta name="theme-color" content="#05080F">
 <title>Präsentation</title>
 <style>
-/* Spielt jede hochgeladene Präsentation in einer festen 16:9-Bühne ab (wie ein Beamer mit
-   1920x1080) und skaliert diese passend auf den Bildschirm. So wird nichts abgeschnitten,
-   egal wie die HTML-Datei selbst aufgebaut ist. */
-:root { --bg: #0D1524; --ink: #E6EAF0; --f: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; color-scheme: dark; }
+/* Spielt jede hochgeladene Präsentation in einer festen 16:9-Bühne ab (wie ein Beamer mit 1920x1080),
+   genau mittig und passend skaliert. Der Player übernimmt die Bedienung selbst:
+   rechts tippen = weiter, links = zurück, Rand oben/unten = Leiste mit Schließen. */
+:root { --bg: #05080F; --ink: #F5F7FB; --gold: #C8955A; --gold-hi: #F0C48A;
+  --f: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; color-scheme: dark; }
 [hidden] { display: none !important; }
-html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; -webkit-tap-highlight-color: transparent; font-family: var(--f); }
-#wrap { position: fixed; inset: 0; overflow: hidden; }
-#frame { position: absolute; left: 50%; top: 50%; border: 0; background: #fff; transform-origin: center center; }
-#close { all: unset; position: fixed; left: max(16px, env(safe-area-inset-left, 0px)); top: calc(16px + env(safe-area-inset-top, 0px)); z-index: 5; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 10px 18px 10px 14px; border-radius: 999px; background: rgba(13,21,36,.85); border: 1px solid rgba(201,209,220,.2); color: var(--ink); font: 600 16px var(--f); transition: opacity .4s, transform .4s; }
-#close svg { width: 20px; height: 20px; fill: currentColor; }
-#close.hide { opacity: 0; transform: translateY(-12px); pointer-events: none; }
-#err { position: fixed; inset: 0; display: grid; place-items: center; color: var(--ink); font-size: 18px; text-align: center; padding: 16px; }
+html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; -webkit-tap-highlight-color: transparent; font-family: var(--f);
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+#wrap { position: fixed; left: 0; top: 0; width: 100%; height: 100%; }
+#clip { position: fixed; overflow: hidden; background: #000; }
+#frame { position: absolute; left: 0; top: 0; border: 0; background: #fff; transform-origin: 0 0; }
+.pill { position: fixed; z-index: 5; display: flex; align-items: center; gap: 4px; padding: 6px; border-radius: 999px;
+  background: rgba(10,15,26,.82); border: 1px solid rgba(220,228,240,.18); box-shadow: 0 12px 40px rgba(0,0,0,.45);
+  backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%); transition: opacity .35s, transform .35s; }
+.pill button { all: unset; cursor: pointer; display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: 999px; color: var(--ink); font: 600 16px var(--f); }
+.pill button:hover { background: rgba(255,255,255,.1); }
+.pill button:active { background: rgba(255,255,255,.18); }
+.pill button:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 1px; }
+.pill svg { width: 20px; height: 20px; fill: currentColor; flex: none; }
+#top { left: max(16px, env(safe-area-inset-left, 0px)); top: calc(14px + env(safe-area-inset-top, 0px)); }
+#nav { left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); }
+#nav .sep { width: 1px; height: 22px; background: rgba(220,228,240,.18); }
+.hide#top { opacity: 0; transform: translateY(-14px); pointer-events: none; }
+.hide#nav { opacity: 0; transform: translate(-50%, 14px); pointer-events: none; }
+#loading { position: fixed; inset: 0; display: grid; place-items: center; z-index: 4; background: var(--bg); transition: opacity .5s; }
+#loading i { width: 44px; height: 44px; border-radius: 50%; border: 3px solid rgba(255,255,255,.12); border-top-color: var(--gold-hi); animation: spin .9s linear infinite; }
+#loading.done { opacity: 0; pointer-events: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+#err { position: fixed; inset: 0; z-index: 6; display: grid; place-items: center; color: var(--ink); font-size: 18px; text-align: center; padding: 16px; background: var(--bg); }
+#err a { color: var(--gold-hi); }
 </style>
 </head>
 <body>
-<div id="wrap"><iframe id="frame" title="Präsentation" allow="fullscreen; screen-wake-lock"></iframe></div>
-<button id="close" class="hide" aria-label="Präsentation schließen"><svg viewBox="0 0 24 24"><path d="M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12z"/></svg>Schließen</button>
-<div id="err" hidden></div>
+<div id="wrap"></div>
+<div id="clip"><iframe id="frame" title="Präsentation" allow="fullscreen; screen-wake-lock"></iframe></div>
+<div id="loading"><i></i></div>
+
+<div class="pill hide" id="top">
+  <button id="close" aria-label="Präsentation schließen"><svg viewBox="0 0 24 24"><path d="M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12z"/></svg>Schließen</button>
+</div>
+<div class="pill hide" id="nav">
+  <button id="prev" aria-label="Vorherige Folie"><svg viewBox="0 0 24 24"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>Zurück</button>
+  <span class="sep"></span>
+  <button id="next" aria-label="Nächste Folie">Weiter<svg viewBox="0 0 24 24"><path d="M8.6 18.6 10 20l8-8-8-8-1.4 1.4 6.6 6.6z"/></svg></button>
+</div>
+<div id="err" hidden><div>Präsentation nicht gefunden.<br><br><a href="/">Zur Übersicht</a></div></div>
+
+<script src="/deck-tools.js"></script>
 <script>
 (function () {
-  const frame = document.getElementById('frame'), close = document.getElementById('close');
+  const $ = (id) => document.getElementById(id);
+  const frame = $('frame'), clip = $('clip'), top = $('top'), navBar = $('nav');
   const id = new URLSearchParams(location.search).get('id') || '';
-  if (!/^[a-z0-9][a-z0-9-]{0,79}$/.test(id)) {
-    const err = document.getElementById('err'); err.hidden = false; err.textContent = 'Präsentation nicht gefunden.'; return;
-  }
+  if (!/^[a-z0-9][a-z0-9-]{0,79}$/.test(id)) { $('err').hidden = false; $('loading').hidden = true; return; }
 
-  // Virtuelle Bildschirmgröße der Präsentation (16:9). Wird größer, falls die Datei breiter gebaut ist.
-  let W = 1920, H = 1080;
+  // ---------- Einpassen ----------
+  // Virtuelle Bildschirmgröße der Präsentation (16:9); crop = sichtbarer Ausschnitt darin (normalerweise alles).
+  let W = 1920, H = 1080, crop = { x: 0, y: 0, w: W, h: H }, k = 1;
   function fit() {
-    const vv = window.visualViewport;
-    const w = vv ? vv.width : innerWidth, h = vv ? vv.height : innerHeight;
-    const k = Math.min(w / W, h / H);
+    // feste Pixelwerte statt Prozent-Zentrierung: Ränder oben/unten bzw. links/rechts sind exakt gleich
+    const vw = document.documentElement.clientWidth || innerWidth, vh = document.documentElement.clientHeight || innerHeight;
+    k = Math.min(vw / crop.w, vh / crop.h);
+    const w = Math.round(crop.w * k), h = Math.round(crop.h * k);
+    Object.assign(clip.style, { width: w + 'px', height: h + 'px', left: Math.floor((vw - w) / 2) + 'px', top: Math.floor((vh - h) / 2) + 'px' });
     frame.style.width = W + 'px'; frame.style.height = H + 'px';
-    frame.style.transform = 'translate(-50%, -50%) scale(' + k + ')';
+    frame.style.transform = `scale(${k}) translate(${-crop.x}px, ${-crop.y}px)`;
   }
   addEventListener('resize', fit);
   addEventListener('orientationchange', () => setTimeout(fit, 300));
   if (window.visualViewport) visualViewport.addEventListener('resize', fit);
   fit();
 
-  frame.addEventListener('load', () => {
+  // ---------- Leiste (nur per Tipp auf den Rand) ----------
+  let hideT;
+  function showBars() { top.classList.remove('hide'); navBar.classList.remove('hide'); clearTimeout(hideT); hideT = setTimeout(hideBars, 4000); }
+  function hideBars() { top.classList.add('hide'); navBar.classList.add('hide'); clearTimeout(hideT); }
+  function toggleBars() { top.classList.contains('hide') ? showBars() : hideBars(); }
+  $('close').addEventListener('click', () => { location.href = '/'; });
+  $('prev').addEventListener('click', () => { go(-1); showBars(); });
+  $('next').addEventListener('click', () => { go(1); showBars(); });
+  $('wrap').addEventListener('click', toggleBars); // dunkler Rand um die Folie
+
+  // ---------- Blättern ----------
+  // Der Präsentation wird ein Pfeiltasten-Druck geschickt (versteht praktisch jede HTML-Präsentation).
+  // Passiert darauf nichts, wird ersatzweise ein Klick in die entsprechende Hälfte weitergegeben.
+  function key(doc, name, code) {
+    const target = doc.activeElement && doc.activeElement !== doc.body ? doc.activeElement : (doc.body || doc.documentElement);
+    for (const type of ['keydown', 'keyup']) {
+      const ev = new KeyboardEvent(type, { key: name, code: name, bubbles: true, cancelable: true });
+      Object.defineProperty(ev, 'keyCode', { get: () => code });
+      Object.defineProperty(ev, 'which', { get: () => code });
+      target.dispatchEvent(ev);
+    }
+  }
+  function go(dir) {
+    let doc; try { doc = frame.contentDocument; } catch (e) { return; }
+    if (!doc) return;
+    let changed = false;
+    const mo = new MutationObserver(() => { changed = true; });
+    mo.observe(doc.documentElement, { subtree: true, attributes: true, childList: true, characterData: true });
+    const win = frame.contentWindow, sx = win.scrollX, sy = win.scrollY;
+    key(doc, dir > 0 ? 'ArrowRight' : 'ArrowLeft', dir > 0 ? 39 : 37);
+    setTimeout(() => {
+      mo.disconnect();
+      if (changed || win.scrollX !== sx || win.scrollY !== sy) return;
+      // Ersatz: Klick in die linke/rechte Hälfte der Folie weiterreichen
+      const x = crop.x + crop.w * (dir > 0 ? 0.8 : 0.2), y = crop.y + crop.h / 2;
+      const el = doc.elementFromPoint(x, y);
+      if (el) el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: x, clientY: y, view: win }));
+    }, 150);
+  }
+
+  // ---------- Eingaben in der Präsentation abfangen ----------
+  // Alle echten Berührungen/Mausbewegungen werden vor der Präsentation abgefangen. Sonst blendet sie bei
+  // jeder Berührung ihre eigene Leiste ein, und das iPad schluckt deshalb den ersten Tipp (Doppeltipp-Problem).
+  const INTERACTIVE = 'input, select, textarea, video, audio, [contenteditable=""], [contenteditable="true"]';
+  function hook(win) {
+    if (!win || win.__playerHooked) return;
+    win.__playerHooked = true;
+    let sx = 0, sy = 0, swiped = false;
+    const pass = (e) => !e.isTrusted || (e.target && e.target.closest && e.target.closest(INTERACTIVE));
+    const swallow = (e) => { if (!pass(e)) e.stopImmediatePropagation(); };
+    ['mousemove', 'mouseover', 'mouseout', 'mousedown', 'mouseup', 'pointermove', 'pointerover', 'pointerout',
+     'pointerdown', 'pointerup', 'touchmove', 'dblclick', 'contextmenu']
+      .forEach((t) => win.addEventListener(t, swallow, { capture: true, passive: true }));
+    win.addEventListener('touchstart', (e) => {
+      if (pass(e)) return;
+      const t = e.changedTouches[0]; sx = t.clientX; sy = t.clientY; swiped = false;
+      e.stopImmediatePropagation();
+    }, { capture: true, passive: true });
+    win.addEventListener('touchend', (e) => {
+      if (pass(e)) return;
+      const t = e.changedTouches[0], dx = (t.clientX - sx) * k, dy = (t.clientY - sy) * k;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) { swiped = true; go(dx < 0 ? 1 : -1); }
+      e.stopImmediatePropagation();
+    }, { capture: true, passive: true });
+    win.addEventListener('click', (e) => {
+      if (pass(e)) return;
+      e.stopImmediatePropagation(); e.preventDefault();
+      if (swiped) { swiped = false; return; }
+      wakeLock();
+      const fx = (e.clientX - crop.x) / crop.w, fy = (e.clientY - crop.y) / crop.h;
+      if (fy < 0.12 || fy > 0.88) { toggleBars(); return; }
+      hideBars();
+      go(fx < 0.5 ? -1 : 1);
+    }, true);
+    // Links in der Präsentation verlassen den Player als Ganzes
+    win.addEventListener('click', (e) => {
+      const a = e.target.closest && e.target.closest('a[href]');
+      if (a && !a.getAttribute('href').startsWith('#')) { e.preventDefault(); location.href = a.href; }
+    }, true);
+  }
+
+  // So früh wie möglich einhängen (noch bevor die Präsentation ihre eigenen Handler registriert)
+  const early = setInterval(() => {
     try {
-      const d = frame.contentDocument, de = d.documentElement;
-      document.title = d.title || 'Präsentation';
-      // Datei mit fester, breiterer Bühne (z. B. 2560 px) ohne eigene Skalierung: Bühne vergrößern
-      const sw = Math.max(de.scrollWidth, d.body ? d.body.scrollWidth : 0);
-      if (sw > W + 4) { W = sw; H = Math.round(sw * 9 / 16); fit(); }
-      // „Schließen“ in der Präsentation selbst soll die ganze Seite verlassen, nicht nur den Rahmen
-      d.addEventListener('click', e => {
-        const a = e.target.closest && e.target.closest('a[href]');
-        if (a && !a.getAttribute('href').startsWith('#')) { e.preventDefault(); location.href = a.href; }
-      }, true);
+      const w = frame.contentWindow;
+      if (w && w.location.href.indexOf('/p/' + id + '.html') !== -1) hook(w);
     } catch (e) {}
+  }, 5);
+
+  frame.addEventListener('load', () => {
+    clearInterval(early);
+    let doc;
+    try { doc = frame.contentDocument; } catch (e) {}
+    if (!doc || !doc.body || /404|Not Found/i.test(doc.title)) { $('err').hidden = false; $('loading').hidden = true; return; }
+    hook(frame.contentWindow);
+    document.title = doc.title || 'Präsentation';
+    // Datei mit fester, breiterer Bühne (z. B. 2560 px) ohne eigene Skalierung: Bühne vergrößern
+    const sw = Math.max(doc.documentElement.scrollWidth, doc.body.scrollWidth);
+    if (sw > W + 4) { W = sw; H = Math.round(sw * 9 / 16); crop = { x: 0, y: 0, w: W, h: H }; fit(); }
+    DeckTools.hideChrome(doc);
+    // Zuschnitt auf die eigentliche Folie, falls die Datei z. B. unten Platz für eine Leiste lässt
+    setTimeout(() => {
+      const a = DeckTools.slideRect(doc);
+      setTimeout(() => {
+        const b = DeckTools.slideRect(doc);
+        if (a && b && Math.abs(a.x - b.x) < 2 && Math.abs(a.y - b.y) < 2 && Math.abs(a.w - b.w) < 2 && Math.abs(a.h - b.h) < 2) { crop = b; fit(); }
+        DeckTools.hideChrome(doc);
+      }, 400);
+    }, 600);
     frame.focus();
+    $('loading').classList.add('done');
   });
   frame.src = '/p/' + id + '.html';
 
-  // Tipp auf den dunklen Rand außerhalb der Präsentation: Schließen-Knopf zeigen/verstecken
-  let t;
-  document.getElementById('wrap').addEventListener('click', e => {
-    if (e.target === frame) return;
-    if (close.classList.contains('hide')) {
-      close.classList.remove('hide'); clearTimeout(t); t = setTimeout(() => close.classList.add('hide'), 4000);
-    } else close.classList.add('hide');
+  // Tastatur (Mac/Laptop), falls der Fokus beim Player statt in der Präsentation liegt
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); go(1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(-1); }
+    else if (e.key === 'Escape') location.href = '/';
   });
-  close.addEventListener('click', () => { location.href = '/'; });
+
+  // Bildschirm während des Vortrags anlassen
+  let lock = null;
+  async function wakeLock() { try { if ('wakeLock' in navigator && !lock) { lock = await navigator.wakeLock.request('screen'); lock.addEventListener('release', () => { lock = null; }); } } catch (e) {} }
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && lock === null) wakeLock(); });
 })();
 </script>
 </body>

@@ -48,6 +48,7 @@ install -d -o www-data -g www-data "$WEB/p"
 install -m 644 "$REPO/web/index.html" "$WEB/index.html"
 install -m 644 "$REPO/web/manifest.webmanifest" "$WEB/manifest.webmanifest"
 install -m 644 "$REPO/web/play.html" "$WEB/play.html"
+install -m 644 "$REPO/web/deck-tools.js" "$WEB/deck-tools.js"
 install -d /opt/praesentationen
 install -m 755 "$REPO/server/upload_server.py" /opt/praesentationen/upload_server.py
 if [ ! -s "$WEB/p/list.json" ]; then
